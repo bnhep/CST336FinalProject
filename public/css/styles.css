@@ -1,0 +1,16 @@
+/********************** Selectors for footer **********************/
+
+footer {
+    text-align: center;
+    margin: 0 auto;
+    font-size: 0.8em;
+    color: #4c4d4c;
+    padding: 25px;
+}
+
+.footer_logo {
+    padding: 5px;
+    margin: 0 auto;    
+    width: 300px;
+    height: auto;
+}

@@ -1,0 +1,29 @@
+# Node dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (secrets)
+.env
+.env.local
+.env.*.local
+
+# OS-specific files
+.DS_Store      # macOS
+Thumbs.db      # Windows
+
+# VS Code workspace settings (optional)
+.vscode/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Optional: IDE folders
+.idea/
+*.sublime-project
+*.sublime-workspace
