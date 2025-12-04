@@ -1,3 +1,315 @@
+/* Forrest theme */
+
+:root {
+    --forest-bg: #020a08;
+    --forest-bg-soft: #071814;
+    --forest-panel: #0d2018;
+    --forest-panel-soft: #132820;
+    --forest-accent: #5ad67d;
+    --forest-accent-soft: #91f1b1;
+    --forest-danger: #a84a4a;
+    --forest-text-main: #f5f7f2;
+    --forest-text-muted: #a5b5a5;
+    --forest-border: rgba(144, 238, 144, 0.3);
+    --forest-glow: 0 0 25px rgba(144, 238, 144, 0.14);
+}
+
+/* Base body */
+.forest-body,
+body {
+    background:
+        radial-gradient(circle at 20% 0%, rgba(144, 238, 144, 0.06), transparent 55%),
+        radial-gradient(circle at 80% 100%, rgba(135, 206, 250, 0.06), transparent 55%),
+        linear-gradient(to bottom, #020a08 0%, #020503 40%, #020b08 100%);
+    color: var(--forest-text-main);
+    font-family: "Lora", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+}
+
+/* Page main wrapper */
+.page-main {
+    padding-bottom: 3rem;
+}
+
+/* Navbar */
+.forest-navbar {
+    background: radial-gradient(circle at 0 0, rgba(144, 238, 144, 0.12), transparent 55%),
+                rgba(2, 10, 8, 0.96);
+    border-bottom: 1px solid rgba(144, 238, 144, 0.25);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+.brand-cryptid {
+    font-family: "Cinzel", serif;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--forest-accent-soft) !important;
+}
+
+.navbar-nav .nav-link {
+    color: var(--forest-text-muted);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--forest-accent-soft);
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--forest-accent-soft);
+    border-bottom: 2px solid var(--forest-accent-soft);
+}
+
+.text-light-forest {
+    color: var(--forest-text-muted);
+}
+
+/* Featured cryptid section */
+.featured-cryptid-section {
+    position: relative;
+}
+
+.featured-cryptid-card {
+    border-left: 3px solid var(--forest-accent);
+}
+
+.featured-label {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.75rem;
+    color: var(--forest-text-muted);
+}
+
+.featured-name {
+    font-family: "Cinzel", serif;
+    font-size: 1.6rem;
+}
+
+.featured-region {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--forest-text-muted);
+}
+
+.featured-blurb {
+    font-size: 0.95rem;
+    color: var(--forest-text-main);
+}
+
+.featured-note {
+    font-size: 0.8rem;
+    color: var(--forest-text-muted);
+}
+
+/* Hero */
+.forest-hero {
+    position: relative;
+    min-height: 55vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 0 3rem;
+    overflow: hidden;
+}
+
+.forest-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 10% 0%, rgba(144, 238, 144, 0.1), transparent 55%),
+        radial-gradient(circle at 80% 100%, rgba(0, 255, 255, 0.08), transparent 55%);
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.forest-hero-inner {
+    position: relative;
+    text-align: center;
+    max-width: 720px;
+}
+
+.hero-tagline {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.8rem;
+    color: var(--forest-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.hero-title {
+    font-family: "Cinzel", serif;
+    font-weight: 700;
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    margin-bottom: 0.75rem;
+}
+
+.hero-subtitle {
+    color: var(--forest-text-muted);
+    max-width: 42rem;
+    margin: 0 auto 1.75rem;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Cards & panels */
+.forest-card {
+    background: radial-gradient(circle at 0 0, rgba(144, 238, 144, 0.06), transparent 60%),
+                var(--forest-panel);
+    border-radius: 1rem;
+    border: 1px solid var(--forest-border);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--forest-glow);
+}
+
+.forest-card-title {
+    font-family: "Cinzel", serif;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.forest-card-text {
+    color: var(--forest-text-muted);
+    font-size: 0.95rem;
+}
+
+/* Buttons */
+.btn-forest {
+    background: var(--forest-accent);
+    border-color: var(--forest-accent);
+    color: #020503;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.btn-forest:hover {
+    background: var(--forest-accent-soft);
+    border-color: var(--forest-accent-soft);
+    color: #020503;
+}
+
+.btn-ghost {
+    background: transparent;
+    border-color: rgba(245, 247, 242, 0.7);
+    color: var(--forest-text-main);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+}
+
+.btn-ghost:hover {
+    background: rgba(245, 247, 242, 0.06);
+}
+
+.btn-forest-danger {
+    background: var(--forest-danger);
+    border-color: var(--forest-danger);
+}
+
+/* Page headers */
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-family: "Cinzel", serif;
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+}
+
+.page-subtitle {
+    color: var(--forest-text-muted);
+    max-width: 40rem;
+}
+
+/* Cryptid cards */
+.cryptid-card {
+    position: relative;
+}
+
+.cryptid-name {
+    font-family: "Cinzel", serif;
+    font-size: 1.2rem;
+}
+
+.cryptid-region {
+    font-size: 0.85rem;
+    color: var(--forest-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.75rem;
+}
+
+.cryptid-blurb {
+    font-size: 0.95rem;
+    color: var(--forest-text-main);
+    margin-bottom: 1rem;
+}
+
+.cryptid-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Inputs */
+.forest-input,
+.forest-input:focus {
+    background-color: var(--forest-panel-soft);
+    border-color: rgba(144, 238, 144, 0.3);
+    color: var(--forest-text-main);
+}
+
+.forest-input::placeholder {
+    color: rgba(165, 181, 165, 0.7);
+}
+
+/* Tiny labels */
+.tiny-labels {
+    font-size: 0.8rem;
+    color: var(--forest-text-muted);
+}
+
+/* Modal */
+.forest-modal {
+    background: var(--forest-panel-soft);
+    border: 1px solid var(--forest-border);
+    color: var(--forest-text-main);
+}
+
+/* Auth section */
+.auth-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.auth-card {
+    box-shadow: 0 0 40px rgba(144, 238, 144, 0.10);
+    max-width: 100%;
+}
+
+/* Footer for dark background */
+footer {
+    color: var(--forest-text-muted);
+}
+
+/* End forrest theme (by Lex)*/
+
+
 /********************** Selectors for footer **********************/
 
 footer {

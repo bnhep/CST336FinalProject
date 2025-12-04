@@ -1,44 +1,64 @@
-<nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/">CRYPTID OR ADOPTION</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+<nav class="navbar navbar-expand-lg forest-navbar">
+  <div class="container">
+    <a class="navbar-brand brand-cryptid" href="/">
+      Cryptid Watch
+    </a>
+
+    <button class="navbar-toggler" type="button"
+      data-bs-toggle="collapse" data-bs-target="#mainNav"
+      aria-controls="mainNav" aria-expanded="false"
+      aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarColor02">
+
+    <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/home">Home</a>
+          <a class="nav-link" href="/">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Browse</a>
+          <a class="nav-link" href="/about">About</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">About</a>
+          <a class="nav-link" href="/cryptids">Cryptids</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/sightings">Your Sightings</a>
         </li>
       </ul>
-      <% if (user) { %>
-        <div id="form-nav" class="d-flex align-items-center gap-2">
-          <span id="span-text" class="nav-link mb-0">Welcome, <%=user.user%></span>
-          <a class="btn btn-outline-light" href="/profile">Profile</a>
-          <button id="logout-btn" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</button>
-        </div>
-      <% } else { %>
-        <div id="form-nav" class="d-flex">
-          <a class="btn btn-outline-light" href="/login">Login</a>
-          <a class="btn btn-outline-light" href="/signup">Create Account</a>
-        </div>
-      <% } %>
+
+      <div class="d-flex align-items-center gap-2">
+        <% if (user) { %>
+          <span class="navbar-text d-none d-md-inline small text-light-forest">
+            Signed in as <strong><%= user.user %></strong>
+          </span>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-light btn-ghost"
+            data-bs-toggle="modal"
+            data-bs-target="#logoutModal">
+            Logout
+          </button>
+        <% } else { %>
+          <a href="/login" class="btn btn-sm btn-outline-light btn-ghost">
+            Sign In
+          </a>
+          <a href="/signup" class="btn btn-sm btn-forest">
+            Sign Up
+          </a>
+        <% } %>
+      </div>
     </div>
   </div>
 </nav>
 
-<div class="modal fade" id="logoutModal">
+<!-- Logout confirmation modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-
-      <div class="modal-header bg-dark" data-bs-theme="dark">
-        <h5 class="modal-title">Confirm Logout</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-content forest-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="logoutModalLabel">Leave the woods?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
@@ -46,10 +66,13 @@
       </div>
 
       <div class="modal-footer">
-        <button id="modal-cancel-btn" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <a class="btn btn-danger" href="/logout">Logout</a>
+        <button id="modal-cancel-btn" type="button" class="btn btn-secondary btn-ghost" data-bs-dismiss="modal">
+          Stay
+        </button>
+        <a class="btn btn-danger btn-forest-danger" href="/logout">
+          Logout
+        </a>
       </div>
-
     </div>
   </div>
 </div>
