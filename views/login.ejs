@@ -17,19 +17,20 @@
                   Log in to track your sightings and revisit your favorite cryptids.
                 </p>
               </header>
-
-              <% if (typeof error !== "undefined" && error) { %>
-                <div class="alert alert-danger py-2">
-                  <%= error %>
-                </div>
-              <% } %>
-
-              <% if (typeof message !== "undefined" && message) { %>
-                <div class="alert alert-success py-2">
-                  <%= message %>
-                </div>
-              <% } %>
-
+              <div id="alert-container">
+                  <% if (typeof error !== "undefined" && error) { %>
+                    <div class="alert alert-danger py-2">
+                      <%= error %>
+                    </div>
+                  <% } %>
+              </div>
+              <div id="alert-container">
+                <% if (typeof message !== "undefined" && message) { %>
+                  <div class="alert alert-success py-2">
+                    <%= message %>
+                  </div>
+                <% } %>
+            </div>
               <form action="/login" method="POST" class="row g-3">
                 <div class="col-12">
                   <label for="username" class="form-label">Username</label>

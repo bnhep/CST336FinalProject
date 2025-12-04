@@ -1,26 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+  <%- include('partials/head.ejs') %>
 
-    <!-- partial for header -->
+  <body class="forest-body">
+    <%- include('partials/nav.ejs') %>
 
-    <%- include('partials/head.ejs') %> 
+    <main class="page-main">
+      <section class="container py-5">
+        <header class="page-header mb-4">
+          <h1 class="page-title">User Profile</h1>
+          <p class="page-subtitle">
+            USER PROFILE IMG GO HERE
+          </p>
+          <strong><%= user.user %></strong>
+        </header>
 
-    <body>
-        <!-- partial for nav -->
-        <%- include('partials/nav.ejs') %> 
+        <div class="forest-card">
 
+        FIRSNAME LASTNAME <br>
 
+        Contact <br>
 
-        <h2 class="text-center">Profile Info</h2>
+        Biography <br>
+    
+        Links <br>
 
+        No links have been added
 
-        <h2 class="text-center">PASSWORD PROTECTED PAGE</h2>
+        </div>
+      </section>
+    </main>
 
-        <h2 class="text-center">WHERE USER CAN EDIT THEIR PROFILE ETC...</h2>
-
-
-        <%- include('partials/footer.ejs') %> 
-        <script src="/js/script.js"></script>  
-    </body>
-
+    <%- include('partials/footer.ejs') %>
+  </body>
 </html>
