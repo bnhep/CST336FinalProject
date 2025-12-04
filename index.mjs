@@ -17,8 +17,7 @@ app.set('trust proxy', 1);
 app.use(session({
    secret: 'keyboard cat',
    resave: false,
-   saveUninitialized: true,
-   cookie: { maxAge: 1000 * 60 * 60 }
+   saveUninitialized: true
 }))
 
 //setting up database connection pool
@@ -33,6 +32,8 @@ const pool = mysql.createPool({
 const conn = await pool.getConnection();
 
 //functions
+
+//function to authenticate certain routes
 function isAuthenticated(req, res, next) {
    if (!req.session.authenticated) {
       res.redirect('/login');
@@ -41,14 +42,17 @@ function isAuthenticated(req, res, next) {
    }
 }
 
+//function to authenticate certain routes(if ADMIN)
+function adminOnly(req, res, next) {
+   if (req.session.user && req.session.user.role === 'admin') {
+      return next();
+   }
+   res.status(403).send('Access denied');
+}
+
 //Sends the {user: username} to all templates if a user exist via the login match
 app.use((req, res, next) => {
    res.locals.user = req.session.user || null; //user available in all templates
-   next();
-});
-
-app.use((req, res, next) => {
-   res.locals.page = null;
    next();
 });
 
@@ -78,7 +82,7 @@ app.get('/cryptids', (req, res) => {
 });
 
 // sightings page
-app.get('/sightings', (req, res) => {
+app.get('/sightings', isAuthenticated, (req, res) => {
    res.render('sightings');
 });
 
@@ -87,29 +91,97 @@ app.get("/signup", (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
+   //get the contents of the POST
    let username = req.body.username;
    let password = req.body.password;
 
-   let sql = `SELECT * FROM admin WHERE username = ?`;
+   //gets the username
+   let sql = `SELECT * 
+               FROM users 
+               WHERE username = ?`;
    const [rows] = await conn.query(sql, [username]);
 
-   // User not found
+   //username existence validation
    if (rows.length === 0) {
-      return res.redirect('/login'); 
+      return res.render('login', {error: 'Username not found. Please sign up first.'});
    }
 
+   //if user exists get user contents
+   let user = rows[0];
    let passwordHash = rows[0].password;
 
+   //check password match using bcrpyt
    let match = await bcrypt.compare(password, passwordHash);
 
+   if (!match) {
+      return res.render('login', {error: 'Incorrect password.'});
+   }
+   
+   //create a session for the user if succesful login
    if (match) {
-      req.session.authenticated = true;
-      req.session.user = {user: username};
-      res.redirect('/welcome');
+      req.session.regenerate((err) => {
+         if (err) throw err;
+         req.session.authenticated = true;
+         req.session.user = {
+               id: user.userId,
+               user: user.username,
+               role: user.role
+         };
+         res.redirect('/welcome');
+      });
    } else {
-      res.redirect('/login');
+      return res.render('login', {error: 'Incorrect password.'});
    }
 });
+
+app.post('/signup', async (req, res) => {
+   try {
+      //get the contents of the POST
+      let {username, email, password, confirmPassword, firstname, lastname} = req.body;
+
+      //handle confirm password validation
+      if (password !== confirmPassword) {
+         return res.render('signup', {error: 'Passwords do not match.'});
+      }
+
+      //handle username check validation
+      let sql = `SELECT * 
+                  FROM users 
+                  WHERE username = ?`;
+      const [rows] = await conn.query(sql, [username]);
+
+      if (rows.length > 0) {
+         return res.render('signup', {error:  'Username already taken.'});
+      }
+
+      //hash the password to insert to database
+      let passwordHash = await bcrypt.hash(password, 10);
+
+      let insertSQL = `INSERT INTO users 
+                       (username, email, password, first_name, last_name)
+                       VALUES (?, ?, ?, ?, ?)`;
+      const [insertRow] = await conn.query(insertSQL, [username, email, passwordHash, firstname || null, lastname || null]);
+
+      //create the sessions for a new user
+      req.session.regenerate((err) => {
+         if (err) throw err;
+         req.session.authenticated = true;
+         req.session.user = {
+               id: insertRow.insertId,
+               user: username,
+               role: 'user'
+         };
+         res.redirect('/welcome');
+      });
+
+   } catch (err) {
+      console.error(err);
+      res.render('signup', { error: 'An error occurred. Please try again.' });
+   }
+});
+
+
+
 
 //Authenticated routes here(needs to have isAuthenticated)
 app.get('/welcome', isAuthenticated, (req, res) => {
@@ -125,8 +197,6 @@ app.get('/profile', isAuthenticated, (req, res) => {
    res.render('profile')
 });
 /*****************************************/
-
-
 
 //DB TEST
 app.get("/dbTest", async(req, res) => {

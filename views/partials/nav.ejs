@@ -29,9 +29,17 @@
 
       <div class="d-flex align-items-center gap-2">
         <% if (user) { %>
+
           <span class="navbar-text d-none d-md-inline small text-light-forest">
             Signed in as <strong><%= user.user %></strong>
           </span>
+          <a href="/profile" class="profile-link d-flex align-items-center">
+            <img 
+              src="<%= user.avatar || '/img/profileplaceholder.png' %>" 
+              alt="Profile" 
+              class="profile-img me-2"
+            >
+          </a>
           <button
             type="button"
             class="btn btn-sm btn-outline-light btn-ghost"
