@@ -80,7 +80,7 @@ app.post('/login', async (req, res) => {
 
    // User not found
    if (rows.length === 0) {
-      return res.redirect('/'); 
+      return res.redirect('/login'); 
    }
 
    let passwordHash = rows[0].password;
@@ -92,7 +92,7 @@ app.post('/login', async (req, res) => {
       req.session.user = {user: username};
       res.redirect('/welcome');
    } else {
-      res.redirect('/');
+      res.redirect('/login');
    }
 });
 
