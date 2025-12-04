@@ -14,3 +14,40 @@ footer {
     width: 300px;
     height: auto;
 }
+
+
+/* remove this im testing card */
+#test-card {
+    margin: 0 auto;
+    margin-top: 40px !important;
+    padding-top: 20px;
+    width: 70%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    border-radius: 10px;
+    box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+    object-fit: contain;
+}
+
+#test-card img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
+#test-card figure {
+    margin: 10px;
+    flex: 1;
+}
+
+#form-nav {
+    gap: 20px !important;
+}
+
+#span-text {
+    color: white !important;
+}
