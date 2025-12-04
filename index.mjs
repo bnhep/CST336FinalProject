@@ -54,8 +54,8 @@ app.use((req, res, next) => {
 
 /********** ROUTES GO HERE ***************/
 //General route(anyone can use)
-app.get('/', (req, res) => {
-   res.render('index');
+app.get("/", (req, res) => {
+  res.render("index");
 });
 
 app.get('/login', (req, res) => {
@@ -65,6 +65,21 @@ app.get('/login', (req, res) => {
 //home page
 app.get('/home', (req, res) => {
    res.render('index');
+});
+
+// about page
+app.get('/about', (req, res) => {
+   res.render('about');
+});
+
+// cryptids page
+app.get('/cryptids', (req, res) => {
+   res.render('cryptids');
+});
+
+// sightings page
+app.get('/sightings', (req, res) => {
+   res.render('sightings');
 });
 
 app.get("/signup", (req, res) => {
