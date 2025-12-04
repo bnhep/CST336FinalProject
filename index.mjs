@@ -43,8 +43,13 @@ function isAuthenticated(req, res, next) {
 
 //Sends the {user: username} to all templates if a user exist via the login match
 app.use((req, res, next) => {
-  res.locals.user = req.session.user || null; //user available in all templates
-  next();
+   res.locals.user = req.session.user || null; //user available in all templates
+   next();
+});
+
+app.use((req, res, next) => {
+   res.locals.page = null;
+   next();
 });
 
 /********** ROUTES GO HERE ***************/
@@ -60,6 +65,10 @@ app.get('/login', (req, res) => {
 //home page
 app.get('/home', (req, res) => {
    res.render('index');
+});
+
+app.get("/signup", (req, res) => {
+   res.render('signup', {page:"signup"});
 });
 
 app.post('/login', async (req, res) => {

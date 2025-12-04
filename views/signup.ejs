@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <!-- partial for header -->
+
+    <%- include('partials/head.ejs') %> 
+
+    <body>
+        <!-- partial for nav -->
+        <%- include('partials/nav.ejs') %> 
+
+    <div class="container auth-container">
+    <div class="auth-tabs d-flex justify-content-center mb-4">
+        <a href="/login" class="auth-tab">Sign in</a>
+        <a href="/signup" class="auth-tab active">Create Account</a>
+    </div>
+
+    <hr class="divider">
+
+    <form action="/signup" method="POST">
+        <!-- Username -->
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control mb-3 auth-input" id="username" name="username" placeholder="*Enter a username" required>
+        <!-- Password -->
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control mb-2 auth-input" id="password" name="password" placeholder="*Enter password" required>
+
+        <label for="confirmpassword" class="form-label">Confirm Password</label>
+        <input type="password" class="form-control mb-2 auth-input" id="confirmpassword" name="confirmpassword" placeholder="*Re-Enter Password" required>
+
+        <label for="firstname" class="form-label">First Name</label>
+        <input type="text" class="form-control mb-3 auth-input" id="firstname" name="firstname" placeholder="*First Name" required>
+
+        <label for="lastname" class="form-label">Last Name</label>
+        <input type="text" class="form-control mb-3 auth-input" id="lastname" name="lastname" placeholder="*Last Name" required>
+
+
+
+        <div class="d-flex justify-content-between mb-3 small">
+            <div></div>
+            <span>* Required</span>
+        </div>
+        <br>
+        <button class="btn btn-dark w-100 py-2 auth-btn">Create Account</button>
+    </form>
+    <div class="d-flex align-items-center my-4">
+        <hr class="flex-grow-1">
+        <hr class="flex-grow-1">
+    </div>
+
+    </div>
+
+        <%- include('partials/footer.ejs') %> 
+        <script src="/js/script.js"></script>  
+    </body>
+
+</html>

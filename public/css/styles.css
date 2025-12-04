@@ -63,12 +63,19 @@ footer {
     color: #777;
     text-decoration: none;
     padding-bottom: 6px;
+    cursor: pointer;
+}
+
+.auth-tab:hover {
+    color: #000;
 }
 
 .auth-tab.active {
     color: #000;
     border-bottom: 1px solid #000;
 }
+
+
 
 .divider {
     margin-bottom: 30px;
