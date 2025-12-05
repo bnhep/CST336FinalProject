@@ -7,6 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 //triggers the modal
 function logoutChecker() {
-    var myModal = new bootstrap.Modal(document.getElementById('authorModal'));
-    myModal.show();
+  var myModal = new bootstrap.Modal(document.getElementById('authorModal'));
+  myModal.show();
 }

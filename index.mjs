@@ -36,7 +36,12 @@ const conn = await pool.getConnection();
 //function to authenticate certain routes
 function isAuthenticated(req, res, next) {
    if (!req.session.authenticated) {
-      res.redirect('/login');
+      //maintains the current url of the authenticated page
+      //so when a user signs in it goes back to that page
+      req.session.returnTo = req.originalUrl;
+      
+      req.session.loginMessage = "Please sign in to continue.";
+      return res.redirect('/login');
    } else {
       next();
    }
@@ -59,11 +64,19 @@ app.use((req, res, next) => {
 /********** ROUTES GO HERE ***************/
 //General route(anyone can use)
 app.get("/", (req, res) => {
-  res.render("index");
+   res.render("index");
 });
 
 app.get('/login', (req, res) => {
-   res.render('login');
+   //req.session.loginMessage is created in isAuthenticated function
+   //handles authenticated page logins otherwise there is no message aka default login is blank
+   const message = req.session.loginMessage;
+   delete req.session.loginMessage;
+
+   res.render('login', {
+      message: message || null,
+      returnTo: req.session.returnTo || null
+   });
 });
 
 //home page
@@ -118,20 +131,20 @@ app.post('/login', async (req, res) => {
    }
    
    //create a session for the user if succesful login
-   if (match) {
-      req.session.regenerate((err) => {
-         if (err) throw err;
-         req.session.authenticated = true;
-         req.session.user = {
-               id: user.userId,
-               user: user.username,
-               role: user.role
-         };
-         res.redirect('/welcome');
-      });
-   } else {
-      return res.render('login', {error: 'Incorrect password.'});
-   }
+   const returnTo = req.session.returnTo;
+
+   req.session.regenerate((err) => {
+      if (err) throw err;
+      req.session.authenticated = true;
+      req.session.user = {
+            id: user.userId,
+            user: user.username,
+            role: user.role
+      };
+      
+      res.redirect(returnTo || '/welcome');
+   });
+
 });
 
 app.post('/signup', async (req, res) => {
@@ -179,9 +192,6 @@ app.post('/signup', async (req, res) => {
       res.render('signup', { error: 'An error occurred. Please try again.' });
    }
 });
-
-
-
 
 //Authenticated routes here(needs to have isAuthenticated)
 app.get('/welcome', isAuthenticated, (req, res) => {
