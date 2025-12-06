@@ -329,6 +329,92 @@ footer {
     color: var(--forest-text-muted);
 }
 
+/* Rubric page */
+.rubric-card {
+    background: radial-gradient(circle at 0 0, rgba(144, 238, 144, 0.06), transparent 60%),
+                var(--forest-panel);
+}
+
+.rubric-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.rubric-item {
+    border-radius: 0.9rem;
+    border: 1px solid rgba(244, 67, 54, 0.5); /* red by default */
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rubric-item:hover {
+    background-color: rgba(20, 40, 32, 0.9);
+    box-shadow: 0 0 18px rgba(244, 67, 54, 0.25);
+}
+
+.rubric-title {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.rubric-desc {
+    font-size: 0.9rem;
+    color: var(--forest-text-muted);
+}
+
+.rubric-status-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    min-width: 130px;
+}
+
+.rubric-status-text {
+    font-size: 0.85rem;
+    color: #ff8a80;
+}
+
+/* badges */
+.rubric-badge {
+    border-radius: 999px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.rubric-badge-pending {
+    background-color: rgba(244, 67, 54, 0.15);
+    border: 1px solid rgba(244, 67, 54, 0.7);
+    color: #ff8a80;
+}
+
+.rubric-badge-complete {
+    background-color: rgba(129, 199, 132, 0.18);
+    border: 1px solid rgba(129, 199, 132, 0.8);
+    color: #81c995;
+}
+
+.rubric-legend .rubric-badge {
+    margin-right: 0.5rem;
+}
+
+/* Completed state = green */
+.rubric-item.completed {
+    border-color: rgba(129, 199, 132, 0.9);
+    box-shadow: 0 0 18px rgba(129, 199, 132, 0.25);
+}
+
+.rubric-item.completed .rubric-status-text {
+    color: #81c995;
+}
+
 /* End forrest theme (by Lex)*/
 
 

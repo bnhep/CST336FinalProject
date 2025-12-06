@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/head.ejs') %>
+
+  <body class="forest-body">
+    <%- include('partials/nav.ejs') %>
+
+    <main class="page-main">
+      <section class="container py-5">
+        <header class="page-header mb-4 text-center">
+          <h1 class="page-title">Project Rubric</h1>
+          <p class="page-subtitle">
+            Click each requirement row as you complete it. Red = not done yet, green = completed.
+          </p>
+        </header>
+
+        <div class="forest-card rubric-card">
+          <div class="rubric-legend mb-3">
+            <span class="badge rubric-badge rubric-badge-pending">Not done</span>
+            <span class="badge rubric-badge rubric-badge-complete">Complete</span>
+          </div>
+
+          <div class="rubric-list">
+
+            <!-- Form elements -->
+            <article class="rubric-item" data-rubric-id="forms">
+              <div class="rubric-main">
+                <h2 class="rubric-title">
+                  allows user interaction with at least three different types of form elements
+                </h2>
+                <p class="rubric-desc">
+                  (text box, select, radio, checkbox, etc.)
+                </p>
+              </div>
+              <div class="rubric-status-wrap">
+                <span class="rubric-status-text">Not done yet</span>
+                <span class="badge rubric-badge rubric-badge-pending">15 pts</span>
+              </div>
+            </article>
+
+            <!-- Web storage / Sessions -->
+            <article class="rubric-item" data-rubric-id="storage">
+              <div class="rubric-main">
+                <h2 class="rubric-title">
+                  Uses Web Storage or Sessions
+                </h2>
+                <p class="rubric-desc">
+                  Persist something for the user (e.g., login, preferences, last cryptid viewed).
+                </p>
+              </div>
+              <div class="rubric-status-wrap">
+                <span class="rubric-status-text">Not done yet</span>
+                <span class="badge rubric-badge rubric-badge-pending">15 pts</span>
+              </div>
+            </article>
+
+            <!-- Update existing records -->
+            <article class="rubric-item" data-rubric-id="update">
+              <div class="rubric-main">
+                <h2 class="rubric-title">
+                  Project allow users to update existing records in the database, in a friendly way (data is pre-filled).
+                </h2>
+                <p class="rubric-desc">
+                  Must update at least three fields.
+                </p>
+              </div>
+              <div class="rubric-status-wrap">
+                <span class="rubric-status-text">Not done yet</span>
+                <span class="badge rubric-badge rubric-badge-pending">15 pts</span>
+              </div>
+            </article>
+
+            <!-- Add records -->
+            <article class="rubric-item" data-rubric-id="add">
+              <div class="rubric-main">
+                <h2 class="rubric-title">
+                  Allow users to add records to the database
+                </h2>
+              </div>
+              <div class="rubric-status-wrap">
+                <span class="rubric-status-text">Not done yet</span>
+                <span class="badge rubric-badge rubric-badge-pending">15 pts</span>
+              </div>
+            </article>
+
+            <!-- 50 lines of client-side JS -->
+            <article class="rubric-item" data-rubric-id="js">
+              <div class="rubric-main">
+                <h2 class="rubric-title">
+                  Must have at least 50 lines of client-side JavaScript code
+                </h2>
+                <p class="rubric-desc">
+                  (e.g. form data validation, API calls, etc.)
+                </p>
+              </div>
+              <div class="rubric-status-wrap">
+                <span class="rubric-status-text">Not done yet</span>
+                <span class="badge rubric-badge rubric-badge-pending">15 pts</span>
+              </div>
+            </article>
+
+            <!-- Two Web APIs -->
+            <article class="rubric-item" data-rubric-id="apis">
+              <div class="rubric-main">
+                <h2 class="rubric-title">
+                  Includes at least two local or external Web APIs
+                </h2>
+                <p class="rubric-desc">
+                  Explain where the Fetch calls are.
+                </p>
+              </div>
+              <div class="rubric-status-wrap">
+                <span class="rubric-status-text">Not done yet</span>
+                <span class="badge rubric-badge rubric-badge-pending">15 pts</span>
+              </div>
+            </article>
+
+            <!-- Design + CSS / Bootstrap -->
+            <article class="rubric-item" data-rubric-id="design">
+              <div class="rubric-main">
+                <h2 class="rubric-title">
+                  Professional, consistent design, free of typos
+                </h2>
+                <p class="rubric-desc">
+                  Uses at least 50 CSS properties or Bootstrap.
+                </p>
+              </div>
+              <div class="rubric-status-wrap">
+                <span class="rubric-status-text">Not done yet</span>
+                <span class="badge rubric-badge rubric-badge-pending">10 pts</span>
+              </div>
+            </article>
+
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <%- include('partials/footer.ejs') %>
+    <script src="/js/script.js"></script>
+  </body>
+</html>
