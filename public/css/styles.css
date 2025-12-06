@@ -405,16 +405,6 @@ footer {
     margin-right: 0.5rem;
 }
 
-/* Completed state = green */
-.rubric-item.completed {
-    border-color: rgba(129, 199, 132, 0.9);
-    box-shadow: 0 0 18px rgba(129, 199, 132, 0.25);
-}
-
-.rubric-item.completed .rubric-status-text {
-    color: #81c995;
-}
-
 /* End forrest theme (by Lex)*/
 
 
