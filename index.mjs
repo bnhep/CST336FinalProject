@@ -99,6 +99,11 @@ app.get('/sightings', isAuthenticated, (req, res) => {
    res.render('sightings');
 });
 
+// rubric page
+app.get("/rubric", (req, res) => {
+  res.render("rubric");
+});
+
 app.get("/signup", (req, res) => {
    res.render('signup', {page:"signup"});
 });
