@@ -15,8 +15,7 @@
 }
 
 /* Base body */
-.forest-body,
-body {
+.forest-body, body {
     background:
         radial-gradient(circle at 20% 0%, rgba(144, 238, 144, 0.06), transparent 55%),
         radial-gradient(circle at 80% 100%, rgba(135, 206, 250, 0.06), transparent 55%),
@@ -33,6 +32,8 @@ body {
 
 /* Navbar */
 .forest-navbar {
+    position: relative;
+    z-index: 10;
     background: radial-gradient(circle at 0 0, rgba(144, 238, 144, 0.12), transparent 55%),
                 rgba(2, 10, 8, 0.96);
     border-bottom: 1px solid rgba(144, 238, 144, 0.25);
@@ -170,6 +171,27 @@ body {
     padding: 1.5rem 1.75rem;
     box-shadow: var(--forest-glow);
 }
+
+.forest-card-compact {
+    background: radial-gradient(circle at 0 0, rgba(144, 238, 144, 0.04), transparent 50%),
+                var(--forest-panel);
+    border-radius: 1rem;
+    border: 1px solid var(--forest-border);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--forest-glow-light);
+    max-width: 700px;                    
+}
+
+.forest-card-compact .row .inner-profileimg, .forest-card-compact .row .inner-profileinfo  {
+    flex: 1;
+}
+
+.forest-card-compact .col-md-8 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* centers text vertically */
+}
+
 
 .forest-card-title {
     font-family: "Cinzel", serif;
@@ -550,6 +572,66 @@ h5 {
     color: var(--forest-text-main);
 }
 
-.modal-body {
-    background: radial-gradient(circle at 20% 0%, rgba(144, 238, 144, 0.06), transparent 55%), radial-gradient(circle at 80% 100%, rgba(135, 206, 250, 0.06), transparent 55%), linear-gradient(to bottom, #020a08 0%, #020503 40%, #020b08 100%) !important;
+.profile-link::after {
+    display: none !important;
+}
+
+.rubric-item.complete {
+    border-color: #198754;      
+}
+
+.rubric-status-text.complete {
+    color: #198754;
+}
+
+.forest-dropdown {
+    margin-top: 20px;
+    background: radial-gradient(circle at 0 0, rgba(144, 238, 144, 0.12), transparent 55%),
+                rgba(2, 10, 8, 0.96);
+    border: 1px solid var(--forest-border);
+    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1);
+}
+
+.forest-dropdown .dropdown-item {
+    color: var(--forest-text-muted);
+}
+
+.forest-dropdown .dropdown-item:hover {
+    background: transparent;
+    color: var(--forest-accent-soft);
+}
+
+.forest-navbar .dropdown-menu {
+    margin-top: 0.8rem;
+}
+
+.forest-navbar .profile-link {
+    padding-right: 0.5rem;
+}
+
+.forest-navbar .dropdown {
+    display: flex;
+    align-items: center;
+}
+
+.forest-navbar .dropdown-menu-end {
+    width: auto;
+    white-space: nowrap;
+}
+.btn-close {
+    filter: invert(1);
+    opacity: 1;
+}
+.avatar-choice.selected {
+    border: 3px solid var(--forest-accent);
+    box-shadow: 0 0 10px rgba(46, 139, 87, 0.6);
+}
+
+.btn-close.btn-dark {
+    filter: invert(1) grayscale(100%) brightness(0.3);
+}
+
+.btn-close.no-focus:focus {
+    outline: none;
+    box-shadow: none;
 }
