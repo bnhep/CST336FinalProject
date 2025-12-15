@@ -62,10 +62,6 @@ app.use((req, res, next) => {
 });
 
 /********** ROUTES GO HERE ***************/
-//General route(anyone can use)
-app.get("/", (req, res) => {
-   res.render("index");
-});
 
 app.get('/login', (req, res) => {
    //req.session.loginMessage is created in isAuthenticated function
@@ -79,9 +75,9 @@ app.get('/login', (req, res) => {
    });
 });
 
-//home page
-app.get('/home', (req, res) => {
-   res.render('index');
+//General route(anyone can use) also home page
+app.get("/", (req, res) => {
+   res.render("index");
 });
 
 // about page
@@ -101,7 +97,7 @@ app.get('/sightings', isAuthenticated, (req, res) => {
 
 // rubric page
 app.get("/rubric", (req, res) => {
-  res.render("rubric");
+   res.render("rubric");
 });
 
 app.get("/signup", (req, res) => {
@@ -112,7 +108,6 @@ app.post('/login', async (req, res) => {
    //get the contents of the POST
    let username = req.body.username;
    let password = req.body.password;
-
    //gets the username
    let sql = `SELECT * 
                FROM users 
@@ -121,7 +116,7 @@ app.post('/login', async (req, res) => {
 
    //username existence validation
    if (rows.length === 0) {
-      return res.render('login', {error: 'Username not found. Please sign up first.'});
+      return res.render('login', {error: 'Username not found.'});
    }
 
    //if user exists get user contents
@@ -134,20 +129,19 @@ app.post('/login', async (req, res) => {
    if (!match) {
       return res.render('login', {error: 'Incorrect password.'});
    }
-   
+
    //create a session for the user if succesful login
    const returnTo = req.session.returnTo;
-
    req.session.regenerate((err) => {
       if (err) throw err;
       req.session.authenticated = true;
       req.session.user = {
             id: user.userId,
             user: user.username,
-            role: user.role
+            role: user.role,
+            avatar: user.avatar_url
       };
-      
-      res.redirect(returnTo || '/welcome');
+   res.redirect(returnTo || '/welcome');
    });
 
 });
@@ -155,8 +149,8 @@ app.post('/login', async (req, res) => {
 app.post('/signup', async (req, res) => {
    try {
       //get the contents of the POST
-      let {username, email, password, confirmPassword, firstname, lastname} = req.body;
-
+      let {username, email, password, confirmPassword, firstname, lastname, avatar_url} = req.body;
+      console.log(avatar_url);
       //handle confirm password validation
       if (password !== confirmPassword) {
          return res.render('signup', {error: 'Passwords do not match.'});
@@ -169,17 +163,15 @@ app.post('/signup', async (req, res) => {
       const [rows] = await conn.query(sql, [username]);
 
       if (rows.length > 0) {
-         return res.render('signup', {error:  'Username already taken.'});
+         return res.render('signup', {error: 'Username already taken.'});
       }
 
       //hash the password to insert to database
       let passwordHash = await bcrypt.hash(password, 10);
-
       let insertSQL = `INSERT INTO users 
-                       (username, email, password, first_name, last_name)
-                       VALUES (?, ?, ?, ?, ?)`;
-      const [insertRow] = await conn.query(insertSQL, [username, email, passwordHash, firstname || null, lastname || null]);
-
+                       (username, email, password, first_name, last_name, avatar_url)
+                       VALUES (?, ?, ?, ?, ?, ?)`;
+      const [insertRow] = await conn.query(insertSQL, [username, email, passwordHash, firstname || null, lastname || null, avatar_url || null]);
       //create the sessions for a new user
       req.session.regenerate((err) => {
          if (err) throw err;
@@ -187,11 +179,11 @@ app.post('/signup', async (req, res) => {
          req.session.user = {
                id: insertRow.insertId,
                user: username,
-               role: 'user'
+               role: 'user',
+               avatar: avatar_url
          };
          res.redirect('/welcome');
       });
-
    } catch (err) {
       console.error(err);
       res.render('signup', { error: 'An error occurred. Please try again.' });
@@ -208,20 +200,70 @@ app.get('/logout', isAuthenticated, (req, res) => {
    res.redirect('/');
 });
 
-app.get('/profile', isAuthenticated, (req, res) => {
-   res.render('profile')
+app.get('/profile', isAuthenticated, async (req, res) => {
+   let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
+                     FROM users
+                     WHERE userId = ?`;
+   const [rows] = await conn.query(profileSQL,[req.session.user.id])
+   res.render('profile', {profile:rows, message: req.session.message, error: req.session.error})
+   req.session.message = null;
+   req.session.error = null;
 });
+
+app.get('/profile/edit', isAuthenticated, async (req, res) => {
+   let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
+                     FROM users
+                     WHERE userId = ?`;
+   const [rows] = await conn.query(profileSQL,[req.session.user.id])
+   res.render('editprofile', {profile: rows })
+});
+
+//post of profile edit
+app.post('/profile/edit', async (req, res) => {
+   try {
+      let { first_name, last_name, email, contact, bio, avatar_url } = req.body;
+
+      let sql = `UPDATE users 
+                  SET first_name = ?, 
+                  last_name = ?, 
+                  email = ?, 
+                  contact = ?, 
+                  bio = ?, 
+                  avatar_url = ?
+                  WHERE userId = ?`;
+      const [rows] = await conn.query(sql, [first_name, last_name, email, contact, bio, avatar_url, req.session.user.id]);
+      req.session.user.avatar = avatar_url;
+      // Store a success message in session
+      req.session.message = "Profile has been updated successfully.";
+
+      // Redirect back to profile route
+      res.redirect('/profile');
+   } catch (err) {
+      console.error(err);
+      req.session.error = "Something went wrong updating your profile.";
+      res.redirect('/profile/edit');
+   }
+});
+
 /*****************************************/
+
+/*******APIS CAN GO HERE*************/
+app.get('/api/avatars', async (req, res) => {
+   let avatars = `SELECT *
+                  FROM avatars`;
+   const [rows] = await conn.query(avatars)
+   res.send(rows);
+});
 
 //DB TEST
 app.get("/dbTest", async(req, res) => {
    try {
-        const [rows] = await pool.query("SELECT CURDATE()");
-        res.send(rows);
-    } catch (err) {
-        console.error("Database error:", err);
-        res.status(500).send("Database error");
-    }
+         const [rows] = await pool.query("SELECT CURDATE()");
+         res.send(rows);
+      } catch (err) {
+         console.error("Database error:", err);
+         res.status(500).send("Database error");
+      }
 });
 
 

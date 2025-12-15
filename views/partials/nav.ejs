@@ -36,28 +36,52 @@
           <span class="navbar-text d-none d-md-inline small text-light-forest">
             Signed in as <strong><%= user.user %></strong>
           </span>
-          <a href="/profile" class="profile-link d-flex align-items-center">
-            <img 
-              src="<%= user.avatar || '/img/profileplaceholder.png' %>" 
-              alt="Profile" 
-              class="profile-img me-2"
-            >
-          </a>
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-light btn-ghost"
-            data-bs-toggle="modal"
-            data-bs-target="#logoutModal">
-            Logout
-          </button>
-        <% } else { %>
-          <a href="/login" class="btn btn-sm btn-outline-light btn-ghost">
-            Sign In
-          </a>
-          <a href="/signup" class="btn btn-sm btn-forest">
-            Sign Up
-          </a>
-        <% } %>
+
+          
+          <div class="dropdown">
+              <a
+                href="#"
+                class="d-flex align-items-center profile-link dropdown-toggle"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <img 
+                  src="<%= user.avatar || '/img/profileplaceholder.png' %>" 
+                  alt="Profile" 
+                  class="profile-img me-2">
+              </a>
+
+            <ul class="dropdown-menu dropdown-menu-end forest-dropdown">
+              <li>
+                <a class="dropdown-item d-flex align-items-center" href="/profile">
+                  <i class="bi bi-person me-2 fs-6"></i> Profile
+                </a>
+              </li>
+              <% if (user.role === 'admin') { %>
+                <li>
+                  <a class="dropdown-item d-flex align-items-center" href="/admin">
+                    <i class="bi bi-tools me-2 fs-6"></i> Admin Dashboard
+                  </a>
+                </li>
+              <% } %>
+            </ul>
+          </div>
+          
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-light btn-ghost"
+              data-bs-toggle="modal"
+              data-bs-target="#logoutModal">
+              Logout
+            </button>
+          <% } else { %>
+            <a href="/login" class="btn btn-sm btn-outline-light btn-ghost">
+              Sign In
+            </a>
+            <a href="/signup" class="btn btn-sm btn-forest">
+              Sign Up
+            </a>
+          <% } %>
       </div>
     </div>
   </div>
@@ -69,7 +93,7 @@
     <div class="modal-content forest-modal">
       <div class="modal-header">
         <h5 class="modal-title" id="logoutModalLabel">Leave the woods?</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close no-focus" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
