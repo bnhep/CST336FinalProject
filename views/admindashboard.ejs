@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/head.ejs') %>
+
+  <body class="forest-body">
+    <%- include('partials/nav.ejs') %>
+
+    <main class="page-main">
+      <section class="container py-5">
+        <header class="page-header mb-4">
+          <h1 class="page-title">Admin Dashboard</h1>
+        </header>
+
+        <% if (typeof error !== "undefined" && error) { %>
+          <div class="alert alert-danger alert-dismissible w-50 mx-auto text-center" role="alert">
+            <%= error %>
+            <button type="button" class="btn-close btn-dark no-focus" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+
+        <% if (typeof message !== "undefined" && message) { %>
+          <div class="alert alert-success alert-dismissible w-50 mx-auto text-center" role="alert">
+            <%= message %>
+            <button type="button" class="btn-close btn-dark no-focus" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+
+        <div class=" p-4">
+          <div class="row g-4 justify-content-center">
+
+            <!-- Option 1 -->
+            <div class="col-md-4 text-center">
+            <div class="forest-card cryptid-card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                <i class="bi bi-people fs-1 mb-3"></i>
+                <h5 class="card-title">Manage Users</h5>
+                <p class="card-text page-subtitle">Edit or remove user accounts.</p>
+
+                <!-- selectdropdown for users -->
+                <select id="userSelect" class="form-select mb-3">
+                    <option selected disabled value="0">Choose a user</option>
+                    <option value="1">User A</option>
+                    <option value="2">User B</option>
+                </select>
+                <a id="manageUserLink" href="/admindashboard/users" class="btn btn-forest mt-auto"><i class="bi bi-pencil-square me-1"></i> Manage</a>
+                </div>
+            </div>
+            </div>
+
+
+            <!-- Option 2 -->
+            <div class="col-md-4 text-center">
+            <div class="forest-card cryptid-card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                <i class="bi bi-clipboard2-data-fill fs-1 mb-3"></i>
+                <h5 class="card-title">Manage Sightings</h5>
+                <p class="card-text page-subtitle">Edit or remove user sightings.</p>
+
+                <!-- selectdropdown for users -->
+                <select id="sightingSelect" class="form-select mb-3">
+                    <option selected disabled value="0">Choose a sightings</option>
+                    <option value="1">Sightings A</option>
+                    <option value="2">Sightings B</option>
+                </select>
+                <a id="manageSightingLink" href="/admindashboard/sightings" class="btn btn-forest mt-auto"><i class="bi bi-pencil-square me-1"></i>Manage</a>
+                </div>
+            </div>
+            </div>
+
+            <!-- Option 3 -->
+            <div class="col-md-4 text-center">
+            <div class="forest-card cryptid-card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                <i class="bi bi-clipboard2-plus fs-1 mb-3"></i>
+                <h5 class="card-title">Manage Sightings</h5>
+                <p class="card-text page-subtitle">Edit, remove or add Cryptids.</p>
+
+                <!-- selectdropdown for users -->
+                <select id="cryptidSelect" class="form-select mb-3">
+                    <option selected disabled value="0">Choose a Cryptid</option>
+                    <option value="1">Sightings A</option>
+                    <option value="2">Sightings B</option>
+                </select>
+
+                <a id="manageCryptidLink" href="/admindashboard/cryptids" class="btn btn-forest mt-auto mb-3"><i class="bi bi-pencil-square me-1"></i>Manage</a>
+                <a href="/admin/addcryptid" class="btn btn-forest mt-auto"><i class="bi bi-plus-square me-1"></i>Add a new Cryptid</a>
+
+                </div>
+            </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <%- include('partials/footer.ejs') %>
+    <script src="/js/admindashboard.js"></script>
+  </body>
+</html>
