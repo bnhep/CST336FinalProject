@@ -417,7 +417,7 @@ app.post('/profile/edit', async (req, res) => {
       const [rows] = await conn.query(sql, [first_name, last_name, email, contact, bio, avatar_url, req.session.user.id]);
       req.session.user.avatar = avatar_url;
       // Store a success message in session
-      req.session.message = "Profile has been updated successfully.";
+      req.session.message = "Profile has been updated.";
 
       // Redirect back to profile route
       res.redirect('/profile');
@@ -426,6 +426,11 @@ app.post('/profile/edit', async (req, res) => {
       req.session.error = "Something went wrong updating your profile.";
       res.redirect('/profile/edit');
    }
+});
+
+
+app.get("/admindashboard", isAuthenticated, adminOnly, (req, res) => {
+   res.render('admindashboard');
 });
 
 /*****************************************/
