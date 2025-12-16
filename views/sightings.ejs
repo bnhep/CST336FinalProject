@@ -7,69 +7,222 @@
 
     <main class="page-main">
       <section class="container py-5">
-        <header class="page-header mb-4">
-          <h1 class="page-title">Your Sightings</h1>
-          <p class="page-subtitle">
-            Log your encounters with the unknown. Just a visual shell
-            &ndash; TODO: the backend later.
-          </p>
+        <header
+          class="page-header mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3"
+        >
+          <div>
+            <h1 class="page-title">Sightings</h1>
+            <p class="page-subtitle">
+              Explore cryptid sightings by creature, location, or your own encounters. Filter them by time and sort by date.
+            </p>
+            <% if (error) { %>
+              <div class="alert alert-danger mt-2"><%= error %></div>
+            <% } %>
+          </div>
+
+          <div>
+            <a href="/sightings/new" class="btn btn-forest">
+              + Log New Sighting
+            </a>
+          </div>
         </header>
 
-        <div class="forest-card">
-          <form class="row g-4">
-            <div class="col-md-6">
-              <label for="cryptidName" class="form-label">Cryptid</label>
-              <input type="text" class="form-control forest-input" id="cryptidName" placeholder="e.g., Bigfoot">
-            </div>
-
-            <div class="col-md-6">
-              <label for="location" class="form-label">Location</label>
-              <input type="text" class="form-control forest-input" id="location" placeholder="e.g., Redwood National Park">
-            </div>
-
-            <div class="col-md-6">
-              <label for="date" class="form-label">Date</label>
-              <input type="date" class="form-control forest-input" id="date">
-            </div>
-
-            <div class="col-md-6">
-              <label for="time" class="form-label">Time</label>
-              <input type="time" class="form-control forest-input" id="time">
-            </div>
-
-            <div class="col-12">
-              <label for="details" class="form-label">What did you see?</label>
-              <textarea
-                id="details"
+        <!-- Search form -->
+        <div class="forest-card mb-4">
+          <form class="row g-3 align-items-end" method="get" action="/sightings">
+            <!-- Search by -->
+            <div class="col-md-3">
+              <label for="mode" class="form-label">Search by</label>
+              <select
+                id="mode"
+                name="mode"
                 class="form-control forest-input"
-                rows="4"
-                placeholder="Describe sounds, shapes, lights, tracks, or anything that felt… off.">
-              </textarea>
+              >
+                <option value="cryptid" <%= mode === 'cryptid' ? 'selected' : '' %>>
+                  Cryptid
+                </option>
+                <option value="location" <%= mode === 'location' ? 'selected' : '' %>>
+                  Location
+                </option>
+                <% if (user) { %>
+                  <option value="mine" <%= mode === 'mine' ? 'selected' : '' %>>
+                    Your sightings
+                  </option>
+                <% } %>
+              </select>
             </div>
 
-            <div class="col-md-6">
-              <label for="mood" class="form-label">How scary was it?</label>
-              <input type="range" class="form-range" id="mood" min="1" max="5">
-              <div class="d-flex justify-content-between tiny-labels">
-                <span>Chill</span>
-                <span>Uneasy</span>
-                <span>Terrified</span>
-              </div>
+            <!-- Cryptid dropdown -->
+            <div class="col-md-4 filter-block filter-cryptid <%= mode === 'cryptid' ? '' : 'd-none' %>">
+              <label for="cryptidSelect" class="form-label">Cryptid</label>
+              <select
+                id="cryptidSelect"
+                name="cryptid_id"
+                class="form-control forest-input"
+              >
+                <option value="">All cryptids</option>
+                <% if (cryptids && cryptids.length) { %>
+                  <% cryptids.forEach(c => { %>
+                    <option
+                      value="<%= c.cryptid_id %>"
+                      <%= String(selectedCryptidId) === String(c.cryptid_id) ? 'selected' : '' %>
+                    >
+                      <%= c.name %>
+                    </option>
+                  <% }) %>
+                <% } %>
+              </select>
             </div>
 
-            <div class="col-12 d-flex justify-content-end gap-2">
-              <button type="reset" class="btn btn-ghost">
-                Clear
+            <!-- Location dropdown -->
+            <div class="col-md-4 filter-block filter-location <%= mode === 'location' ? '' : 'd-none' %>">
+              <label for="locationSelect" class="form-label">Location</label>
+              <select
+                id="locationSelect"
+                name="location_id"
+                class="form-control forest-input"
+              >
+                <option value="">All locations</option>
+                <% if (locations && locations.length) { %>
+                  <% locations.forEach(l => { %>
+                    <option
+                      value="<%= l.location_id %>"
+                      <%= String(selectedLocationId) === String(l.location_id) ? 'selected' : '' %>
+                    >
+                      <%= l.name %>
+                    </option>
+                  <% }) %>
+                <% } %>
+              </select>
+            </div>
+
+            <!-- User sightings -->
+            <div class="col-md-4 filter-block filter-mine <%= mode === 'mine' ? '' : 'd-none' %>">
+              <label class="form-label d-block">Your sightings</label>
+              <p class="tiny-label mb-0">
+                Showing sightings logged under your account.
+              </p>
+            </div>
+
+            <!-- Sort toggle -->
+            <div class="col-md-3">
+              <label class="form-label d-block">Order by time</label>
+              <input
+                type="hidden"
+                id="orderInput"
+                name="order"
+                value="<%= order === 'oldest' ? 'oldest' : 'newest' %>"
+              >
+              <button
+                type="button"
+                id="orderToggle"
+                class="btn btn-ghost"
+              >
+                <% if (order === 'oldest') { %>
+                  Oldest → Newest
+                <% } else { %>
+                  Newest → Oldest
+                <% } %>
               </button>
-              <button type="button" class="btn btn-forest">
-                Save Sighting (placeholder)
+            </div>
+
+            <!-- Time range -->
+            <div class="col-md-6">
+              <label class="form-label">Between years</label>
+              <div class="d-flex gap-2">
+                <select name="year_from" class="form-control forest-input">
+                  <option value="">Any</option>
+                  <% if (years && years.length) { %>
+                    <% years.forEach(y => { %>
+                      <option
+                        value="<%= y %>"
+                        <%= String(yearFrom) === String(y) ? 'selected' : '' %>
+                      >
+                        <%= y %>
+                      </option>
+                    <% }) %>
+                  <% } %>
+                </select>
+                <span class="align-self-center small">to</span>
+                <select name="year_to" class="form-control forest-input">
+                  <option value="">Any</option>
+                  <% if (years && years.length) { %>
+                    <% years.forEach(y => { %>
+                      <option
+                        value="<%= y %>"
+                        <%= String(yearTo) === String(y) ? 'selected' : '' %>
+                      >
+                        <%= y %>
+                      </option>
+                    <% }) %>
+                  <% } %>
+                </select>
+              </div>
+              <p class="tiny-label mt-1 mb-0">
+                Time filter applies to all search modes.
+              </p>
+            </div>
+
+            <!-- Search button -->
+            <div class="col-md-3 d-grid">
+              <button type="submit" class="btn btn-forest">
+                Search
               </button>
             </div>
           </form>
         </div>
+
+        <!-- Results list -->
+        <section>
+          <h2 class="h4 mb-3">
+            <% if (mode === 'cryptid') { %>
+              Sightings by cryptid
+            <% } else if (mode === 'location') { %>
+              Sightings by location
+            <% } else if (mode === 'mine') { %>
+              Your sightings
+            <% } %>
+          </h2>
+
+          <% if (sightings && sightings.length) { %>
+            <% sightings.forEach(s => { %>
+              <div class="forest-card mb-3">
+                <h3 class="h5 mb-1"><%= s.cryptid_name %></h3>
+
+                <p class="tiny-label mb-1">
+                  <strong>When:</strong> <%= s.sighting_date %>
+                  &nbsp; • &nbsp;
+                  <strong>Where:</strong> <%= s.location_name %>
+                </p>
+
+                <p class="tiny-label mb-2">
+                  <% if (s.reported_by) { %>
+                    Reported by <strong><%= s.reported_by %></strong>
+                  <% } else { %>
+                    Reported by <span class="text-muted">Anonymous</span>
+                  <% } %>
+                </p>
+
+                <% if (s.description) { %>
+                  <p><%= s.description %></p>
+                <% } else { %>
+                  <p class="text-muted tiny-label mb-0">No description provided.</p>
+                <% } %>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p class="text-muted">
+              No sightings found for this selection yet.
+              Try adjusting the filters or log a new sighting.
+            </p>
+          <% } %>
+        </section>
       </section>
     </main>
 
     <%- include('partials/footer.ejs') %>
+
+    <!-- sightings js -->
+    <script src="/js/sightings.js"></script>
   </body>
 </html>

@@ -91,8 +91,191 @@ app.get('/cryptids', (req, res) => {
 });
 
 // sightings page
-app.get('/sightings', isAuthenticated, (req, res) => {
-   res.render('sightings');
+app.get('/sightings', async (req, res) => {
+   try {
+      //search options
+      const mode = req.query.mode || 'cryptid';
+      const order = req.query.order === 'oldest' ? 'oldest' : 'newest';
+
+      const selectedLocationId = req.query.location_id || '';
+      const selectedCryptidId = req.query.cryptid_id || '';
+      const yearFrom = req.query.year_from || '';
+      const yearTo = req.query.year_to || '';
+
+      //dropdown data
+      const [cryptids] = await conn.query(
+         'select cryptid_id, name from cryptids order by name'
+      );
+      const [locations] = await conn.query(
+         'select location_id, name from locations order by name'
+      );
+      const [yearRows] = await conn.query(
+         'select distinct year(s.sighting_date) as year from sightings s order by year desc'
+      );
+      const years = yearRows.map(r => r.year);
+
+      const baseSelect = `
+         select s.sighting_id,
+                s.sighting_date,
+                s.description,
+                c.name as cryptid_name,
+                l.name as location_name,
+                u.username as reported_by
+         from sightings s
+         join cryptids c on s.cryptid_id = c.cryptid_id
+         join locations l on s.location_id = l.location_id
+         left join users u on s.userId = u.userId
+      `;
+
+      let whereClauses = [];
+      let params = [];
+
+      //search specific filters
+      if (mode === 'location' && selectedLocationId) {
+         whereClauses.push('s.location_id = ?');
+         params.push(selectedLocationId);
+      } else if (mode === 'cryptid' && selectedCryptidId) {
+         whereClauses.push('s.cryptid_id = ?');
+         params.push(selectedCryptidId);
+      } else if (mode === 'mine') {
+         if (!req.session.authenticated || !req.session.user) {
+            req.session.loginMessage = "Please sign in to view your sightings.";
+            req.session.returnTo = req.originalUrl;
+            return res.redirect('/login');
+         }
+         whereClauses.push('s.userId = ?');
+         params.push(req.session.user.id);
+      }
+
+      //time range filter
+      if (yearFrom && yearTo) {
+         whereClauses.push('year(s.sighting_date) between ? and ?');
+         params.push(yearFrom, yearTo);
+      } else if (yearFrom) {
+         whereClauses.push('year(s.sighting_date) >= ?');
+         params.push(yearFrom);
+      } else if (yearTo) {
+         whereClauses.push('year(s.sighting_date) <= ?');
+         params.push(yearTo);
+      }
+
+      const whereClause = whereClauses.length
+         ? ' where ' + whereClauses.join(' and ')
+         : '';
+
+      const orderClause =
+         order === 'oldest'
+            ? ' order by s.sighting_date asc, s.created_at asc'
+            : ' order by s.sighting_date desc, s.created_at desc';
+
+      //sql query
+      const sql = baseSelect + whereClause + orderClause + ' limit 100';
+
+      const [sightings] = await conn.query(sql, params);
+
+      //load
+      res.render('sightings', {
+         sightings,
+         mode,
+         order,
+         cryptids,
+         locations,
+         years,
+         selectedLocationId,
+         selectedCryptidId,
+         yearFrom,
+         yearTo,
+         error: null
+      });
+   } catch (err) {
+      console.error(err);
+      res.render('sightings', {
+         sightings: [],
+         mode: req.query.mode || 'cryptid',
+         order: req.query.order || 'newest',
+         cryptids: [],
+         locations: [],
+         years: [],
+         selectedLocationId: req.query.location_id || '',
+         selectedCryptidId: req.query.cryptid_id || '',
+         yearFrom: req.query.year_from || '',
+         yearTo: req.query.year_to || '',
+         error: 'Could not load sightings.'
+      });
+   }
+});
+
+//new sighting page
+app.get('/sightings/new', isAuthenticated, async (req, res) => {
+   try {
+      const [cryptids] = await conn.query(
+         'select cryptid_id, name from cryptids order by name'
+      );
+
+      const message = req.session.message || null;
+      const error = req.session.error || null;
+      req.session.message = null;
+      req.session.error = null;
+
+      res.render('sightings-new', { cryptids, message, error });
+   } catch (err) {
+      console.error(err);
+      res.status(500).send('Error loading new sighting form.');
+   }
+});
+
+//submitting new sighting
+app.post('/sightings/new', isAuthenticated, async (req, res) => {
+   try {
+      const userId = req.session.user.id;
+      const {
+         cryptid_id,
+         location_name,
+         date,
+         time,
+         details,
+         mood //threat option
+      } = req.body;
+
+      if (!cryptid_id || !location_name || !date) {
+         req.session.error = 'Cryptid, location, and date are required.';
+         return res.redirect('/sightings/new');
+      }
+
+      const sightingTime = time && time.trim() !== '' ? time : '00:00';
+      const sightingDateTime = `${date} ${sightingTime}:00`;
+
+      //find or create location
+      let [locRows] = await conn.query(
+         'select location_id from locations where name = ?',
+         [location_name]
+      );
+
+      let locationId;
+      if (locRows.length > 0) {
+         locationId = locRows[0].location_id;
+      } else {
+         const [locInsert] = await conn.query(
+            'insert into locations (name) values (?)',
+            [location_name]
+         );
+         locationId = locInsert.insertId;
+      }
+
+      //insert the sighting
+      await conn.query(
+         `insert into sightings (userId, cryptid_id, location_id, sighting_date, description)
+          values (?, ?, ?, ?, ?)`,
+         [userId, cryptid_id, locationId, sightingDateTime, details || null]
+      );
+
+      req.session.message = 'Sighting saved successfully.';
+      res.redirect('/sightings?filter=mine');
+   } catch (err) {
+      console.error(err);
+      req.session.error = 'There was a problem saving your sighting.';
+      res.redirect('/sightings/new');
+   }
 });
 
 // rubric page
