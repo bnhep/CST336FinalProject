@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/head.ejs') %>
+
+  <body class="forest-body">
+    <%- include('partials/nav.ejs') %>
+
+    <main class="page-main">
+      <section class="container py-5">
+        <header class="page-header mb-4">
+          <h1 class="page-title">Log a New Sighting</h1>
+          <p class="page-subtitle">
+            Tell us what you saw, where, and when. The forest remembers.
+          </p>
+
+          <% if (error) { %>
+            <div class="alert alert-danger mt-2"><%= error %></div>
+          <% } %>
+          <% if (message) { %>
+            <div class="alert alert-success mt-2"><%= message %></div>
+          <% } %>
+        </header>
+
+        <div class="forest-card">
+          <form class="row g-4" action="/sightings/new" method="post">
+            <div class="col-md-6">
+              <label for="cryptidId" class="form-label">Cryptid</label>
+              <select
+                id="cryptidId"
+                name="cryptid_id"
+                class="form-control forest-input"
+                required
+              >
+                <option value="">Select a cryptid...</option>
+                <% if (cryptids && cryptids.length) { %>
+                  <% cryptids.forEach(c => { %>
+                    <option value="<%= c.cryptid_id %>"><%= c.name %></option>
+                  <% }) %>
+                <% } %>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="location" class="form-label">Location</label>
+              <input
+                type="text"
+                class="form-control forest-input"
+                id="location"
+                name="location_name"
+                placeholder="e.g., Redwood National Park"
+                required
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label for="date" class="form-label">Date</label>
+              <input
+                type="date"
+                class="form-control forest-input"
+                id="date"
+                name="date"
+                required
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label for="time" class="form-label">Time</label>
+              <input
+                type="time"
+                class="form-control forest-input"
+                id="time"
+                name="time"
+              >
+            </div>
+
+            <div class="col-12">
+              <label for="details" class="form-label">What did you see?</label>
+              <textarea
+                id="details"
+                name="details"
+                class="form-control forest-input"
+                rows="4"
+                placeholder="Describe sounds, shapes, lights, tracks, or anything that felt… off."
+              ></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label for="mood" class="form-label">How scary was it?</label>
+              <input
+                type="range"
+                class="form-range"
+                id="mood"
+                name="mood"
+                min="1"
+                max="5"
+              >
+              <div class="d-flex justify-content-between tiny-labels">
+                <span>Chill</span>
+                <span>Uneasy</span>
+                <span>Terrified</span>
+              </div>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2">
+              <a href="/sightings" class="btn btn-ghost">
+                Cancel
+              </a>
+              <button type="submit" class="btn btn-forest">
+                Save Sighting
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <%- include('partials/footer.ejs') %>
+  </body>
+</html>
