@@ -62,6 +62,10 @@ app.use((req, res, next) => {
 });
 
 /********** ROUTES GO HERE ***************/
+//General route(anyone can use)
+app.get("/", (req, res) => {
+   res.render("index");
+});
 
 app.get('/login', (req, res) => {
    //req.session.loginMessage is created in isAuthenticated function
@@ -75,9 +79,9 @@ app.get('/login', (req, res) => {
    });
 });
 
-//General route(anyone can use) also home page
-app.get("/", (req, res) => {
-   res.render("index");
+//home page
+app.get('/home', (req, res) => {
+   res.render('index');
 });
 
 // about page
@@ -90,197 +94,38 @@ app.get('/cryptids', (req, res) => {
    res.render('cryptids');
 });
 
+app.get('/cryptid/:id', async (req, res) => {
+  let cryptidId = req.params.id;
+  
+  let cryptidSql = 'SELECT * FROM cryptids WHERE cryptid_id = ?';
+  const [cryptidRows] = await conn.query(cryptidSql, [cryptidId]);
+  
+  if (cryptidRows.length === 0) {
+    return res.status(404).send('Cryptid not found');
+  }
+  
+  let sightingsSql = 'SELECT * FROM sightings WHERE cryptid_id = ? ORDER BY sighting_date DESC';
+  const [sightingsRows] = await conn.query(sightingsSql, [cryptidId]);
+  
+  res.render('learnmore', { 
+    cryptid: cryptidRows[0],
+    sightings: sightingsRows
+  });
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 // sightings page
-app.get('/sightings', async (req, res) => {
-   try {
-      //search options
-      const mode = req.query.mode || 'cryptid';
-      const order = req.query.order === 'oldest' ? 'oldest' : 'newest';
-
-      const selectedLocationId = req.query.location_id || '';
-      const selectedCryptidId = req.query.cryptid_id || '';
-      const yearFrom = req.query.year_from || '';
-      const yearTo = req.query.year_to || '';
-
-      //dropdown data
-      const [cryptids] = await conn.query(
-         'select cryptid_id, name from cryptids order by name'
-      );
-      const [locations] = await conn.query(
-         'select location_id, name from locations order by name'
-      );
-      const [yearRows] = await conn.query(
-         'select distinct year(s.sighting_date) as year from sightings s order by year desc'
-      );
-      const years = yearRows.map(r => r.year);
-
-      const baseSelect = `
-         select s.sighting_id,
-                s.sighting_date,
-                s.description,
-                c.name as cryptid_name,
-                l.name as location_name,
-                u.username as reported_by
-         from sightings s
-         join cryptids c on s.cryptid_id = c.cryptid_id
-         join locations l on s.location_id = l.location_id
-         left join users u on s.userId = u.userId
-      `;
-
-      let whereClauses = [];
-      let params = [];
-
-      //search specific filters
-      if (mode === 'location' && selectedLocationId) {
-         whereClauses.push('s.location_id = ?');
-         params.push(selectedLocationId);
-      } else if (mode === 'cryptid' && selectedCryptidId) {
-         whereClauses.push('s.cryptid_id = ?');
-         params.push(selectedCryptidId);
-      } else if (mode === 'mine') {
-         if (!req.session.authenticated || !req.session.user) {
-            req.session.loginMessage = "Please sign in to view your sightings.";
-            req.session.returnTo = req.originalUrl;
-            return res.redirect('/login');
-         }
-         whereClauses.push('s.userId = ?');
-         params.push(req.session.user.id);
-      }
-
-      //time range filter
-      if (yearFrom && yearTo) {
-         whereClauses.push('year(s.sighting_date) between ? and ?');
-         params.push(yearFrom, yearTo);
-      } else if (yearFrom) {
-         whereClauses.push('year(s.sighting_date) >= ?');
-         params.push(yearFrom);
-      } else if (yearTo) {
-         whereClauses.push('year(s.sighting_date) <= ?');
-         params.push(yearTo);
-      }
-
-      const whereClause = whereClauses.length
-         ? ' where ' + whereClauses.join(' and ')
-         : '';
-
-      const orderClause =
-         order === 'oldest'
-            ? ' order by s.sighting_date asc, s.created_at asc'
-            : ' order by s.sighting_date desc, s.created_at desc';
-
-      //sql query
-      const sql = baseSelect + whereClause + orderClause + ' limit 100';
-
-      const [sightings] = await conn.query(sql, params);
-
-      //load
-      res.render('sightings', {
-         sightings,
-         mode,
-         order,
-         cryptids,
-         locations,
-         years,
-         selectedLocationId,
-         selectedCryptidId,
-         yearFrom,
-         yearTo,
-         error: null
-      });
-   } catch (err) {
-      console.error(err);
-      res.render('sightings', {
-         sightings: [],
-         mode: req.query.mode || 'cryptid',
-         order: req.query.order || 'newest',
-         cryptids: [],
-         locations: [],
-         years: [],
-         selectedLocationId: req.query.location_id || '',
-         selectedCryptidId: req.query.cryptid_id || '',
-         yearFrom: req.query.year_from || '',
-         yearTo: req.query.year_to || '',
-         error: 'Could not load sightings.'
-      });
-   }
-});
-
-//new sighting page
-app.get('/sightings/new', isAuthenticated, async (req, res) => {
-   try {
-      const [cryptids] = await conn.query(
-         'select cryptid_id, name from cryptids order by name'
-      );
-
-      const message = req.session.message || null;
-      const error = req.session.error || null;
-      req.session.message = null;
-      req.session.error = null;
-
-      res.render('sightings-new', { cryptids, message, error });
-   } catch (err) {
-      console.error(err);
-      res.status(500).send('Error loading new sighting form.');
-   }
-});
-
-//submitting new sighting
-app.post('/sightings/new', isAuthenticated, async (req, res) => {
-   try {
-      const userId = req.session.user.id;
-      const {
-         cryptid_id,
-         location_name,
-         date,
-         time,
-         details,
-         mood //threat option
-      } = req.body;
-
-      if (!cryptid_id || !location_name || !date) {
-         req.session.error = 'Cryptid, location, and date are required.';
-         return res.redirect('/sightings/new');
-      }
-
-      const sightingTime = time && time.trim() !== '' ? time : '00:00';
-      const sightingDateTime = `${date} ${sightingTime}:00`;
-
-      //find or create location
-      let [locRows] = await conn.query(
-         'select location_id from locations where name = ?',
-         [location_name]
-      );
-
-      let locationId;
-      if (locRows.length > 0) {
-         locationId = locRows[0].location_id;
-      } else {
-         const [locInsert] = await conn.query(
-            'insert into locations (name) values (?)',
-            [location_name]
-         );
-         locationId = locInsert.insertId;
-      }
-
-      //insert the sighting
-      await conn.query(
-         `insert into sightings (userId, cryptid_id, location_id, sighting_date, description)
-          values (?, ?, ?, ?, ?)`,
-         [userId, cryptid_id, locationId, sightingDateTime, details || null]
-      );
-
-      req.session.message = 'Sighting saved successfully.';
-      res.redirect('/sightings?filter=mine');
-   } catch (err) {
-      console.error(err);
-      req.session.error = 'There was a problem saving your sighting.';
-      res.redirect('/sightings/new');
-   }
+app.get('/sightings', isAuthenticated, (req, res) => {
+   res.render('sightings');
 });
 
 // rubric page
 app.get("/rubric", (req, res) => {
-   res.render("rubric");
+  res.render("rubric");
 });
 
 app.get("/signup", (req, res) => {
@@ -291,6 +136,7 @@ app.post('/login', async (req, res) => {
    //get the contents of the POST
    let username = req.body.username;
    let password = req.body.password;
+
    //gets the username
    let sql = `SELECT * 
                FROM users 
@@ -299,7 +145,7 @@ app.post('/login', async (req, res) => {
 
    //username existence validation
    if (rows.length === 0) {
-      return res.render('login', {error: 'Username not found.'});
+      return res.render('login', {error: 'Username not found. Please sign up first.'});
    }
 
    //if user exists get user contents
@@ -312,19 +158,20 @@ app.post('/login', async (req, res) => {
    if (!match) {
       return res.render('login', {error: 'Incorrect password.'});
    }
-
+   
    //create a session for the user if succesful login
    const returnTo = req.session.returnTo;
+
    req.session.regenerate((err) => {
       if (err) throw err;
       req.session.authenticated = true;
       req.session.user = {
             id: user.userId,
             user: user.username,
-            role: user.role,
-            avatar: user.avatar_url
+            role: user.role
       };
-   res.redirect(returnTo || '/welcome');
+      
+      res.redirect(returnTo || '/welcome');
    });
 
 });
@@ -332,8 +179,8 @@ app.post('/login', async (req, res) => {
 app.post('/signup', async (req, res) => {
    try {
       //get the contents of the POST
-      let {username, email, password, confirmPassword, firstname, lastname, avatar_url} = req.body;
-      console.log(avatar_url);
+      let {username, email, password, confirmPassword, firstname, lastname} = req.body;
+
       //handle confirm password validation
       if (password !== confirmPassword) {
          return res.render('signup', {error: 'Passwords do not match.'});
@@ -346,15 +193,17 @@ app.post('/signup', async (req, res) => {
       const [rows] = await conn.query(sql, [username]);
 
       if (rows.length > 0) {
-         return res.render('signup', {error: 'Username already taken.'});
+         return res.render('signup', {error:  'Username already taken.'});
       }
 
       //hash the password to insert to database
       let passwordHash = await bcrypt.hash(password, 10);
+
       let insertSQL = `INSERT INTO users 
-                       (username, email, password, first_name, last_name, avatar_url)
-                       VALUES (?, ?, ?, ?, ?, ?)`;
-      const [insertRow] = await conn.query(insertSQL, [username, email, passwordHash, firstname || null, lastname || null, avatar_url || null]);
+                       (username, email, password, first_name, last_name)
+                       VALUES (?, ?, ?, ?, ?)`;
+      const [insertRow] = await conn.query(insertSQL, [username, email, passwordHash, firstname || null, lastname || null]);
+
       //create the sessions for a new user
       req.session.regenerate((err) => {
          if (err) throw err;
@@ -362,11 +211,11 @@ app.post('/signup', async (req, res) => {
          req.session.user = {
                id: insertRow.insertId,
                user: username,
-               role: 'user',
-               avatar: avatar_url
+               role: 'user'
          };
          res.redirect('/welcome');
       });
+
    } catch (err) {
       console.error(err);
       res.render('signup', { error: 'An error occurred. Please try again.' });
@@ -383,75 +232,20 @@ app.get('/logout', isAuthenticated, (req, res) => {
    res.redirect('/');
 });
 
-app.get('/profile', isAuthenticated, async (req, res) => {
-   let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
-                     FROM users
-                     WHERE userId = ?`;
-   const [rows] = await conn.query(profileSQL,[req.session.user.id])
-   res.render('profile', {profile:rows, message: req.session.message, error: req.session.error})
-   req.session.message = null;
-   req.session.error = null;
+app.get('/profile', isAuthenticated, (req, res) => {
+   res.render('profile')
 });
-
-app.get('/profile/edit', isAuthenticated, async (req, res) => {
-   let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
-                     FROM users
-                     WHERE userId = ?`;
-   const [rows] = await conn.query(profileSQL,[req.session.user.id])
-   res.render('editprofile', {profile: rows })
-});
-
-//post of profile edit
-app.post('/profile/edit', async (req, res) => {
-   try {
-      let { first_name, last_name, email, contact, bio, avatar_url } = req.body;
-
-      let sql = `UPDATE users 
-                  SET first_name = ?, 
-                  last_name = ?, 
-                  email = ?, 
-                  contact = ?, 
-                  bio = ?, 
-                  avatar_url = ?
-                  WHERE userId = ?`;
-      const [rows] = await conn.query(sql, [first_name, last_name, email, contact, bio, avatar_url, req.session.user.id]);
-      req.session.user.avatar = avatar_url;
-      // Store a success message in session
-      req.session.message = "Profile has been updated.";
-
-      // Redirect back to profile route
-      res.redirect('/profile');
-   } catch (err) {
-      console.error(err);
-      req.session.error = "Something went wrong updating your profile.";
-      res.redirect('/profile/edit');
-   }
-});
-
-
-app.get("/admindashboard", isAuthenticated, adminOnly, (req, res) => {
-   res.render('admindashboard');
-});
-
 /*****************************************/
-
-/*******APIS CAN GO HERE*************/
-app.get('/api/avatars', async (req, res) => {
-   let avatars = `SELECT *
-                  FROM avatars`;
-   const [rows] = await conn.query(avatars)
-   res.send(rows);
-});
 
 //DB TEST
 app.get("/dbTest", async(req, res) => {
    try {
-         const [rows] = await pool.query("SELECT CURDATE()");
-         res.send(rows);
-      } catch (err) {
-         console.error("Database error:", err);
-         res.status(500).send("Database error");
-      }
+        const [rows] = await pool.query("SELECT CURDATE()");
+        res.send(rows);
+    } catch (err) {
+        console.error("Database error:", err);
+        res.status(500).send("Database error");
+    }
 });
 
 
