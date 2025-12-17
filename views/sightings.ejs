@@ -36,7 +36,7 @@
               <select
                 id="mode"
                 name="mode"
-                class="form-control forest-input"
+                class="form-select forest-input"
               >
                 <option value="cryptid" <%= mode === 'cryptid' ? 'selected' : '' %>>
                   Cryptid
@@ -58,7 +58,7 @@
               <select
                 id="cryptidSelect"
                 name="cryptid_id"
-                class="form-control forest-input"
+                class="form-select forest-input"
               >
                 <option value="">All cryptids</option>
                 <% if (cryptids && cryptids.length) { %>
@@ -80,7 +80,7 @@
               <select
                 id="locationSelect"
                 name="location_id"
-                class="form-control forest-input"
+                class="form-select forest-input"
               >
                 <option value="">All locations</option>
                 <% if (locations && locations.length) { %>
@@ -130,7 +130,7 @@
             <div class="col-md-6">
               <label class="form-label">Between years</label>
               <div class="d-flex gap-2">
-                <select name="year_from" class="form-control forest-input">
+                <select name="year_from" class="form-select forest-input">
                   <option value="">Any</option>
                   <% if (years && years.length) { %>
                     <% years.forEach(y => { %>
@@ -144,7 +144,7 @@
                   <% } %>
                 </select>
                 <span class="align-self-center small">to</span>
-                <select name="year_to" class="form-control forest-input">
+                <select name="year_to" class="form-select forest-input">
                   <option value="">Any</option>
                   <% if (years && years.length) { %>
                     <% years.forEach(y => { %>
