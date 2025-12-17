@@ -85,6 +85,26 @@ app.get('/about', (req, res) => {
    res.render('about');
 });
 
+//Learn more page
+app.get('/cryptid/:id', async (req, res) => {
+  let cryptidId = req.params.id;
+  
+  let cryptidSql = 'SELECT * FROM cryptids WHERE cryptid_id = ?';
+  const [cryptidRows] = await conn.query(cryptidSql, [cryptidId]);
+  
+  if (cryptidRows.length === 0) {
+    return res.status(404).send('Cryptid not found');
+  }
+  
+  let sightingsSql = 'SELECT * FROM sightings WHERE cryptid_id = ? ORDER BY sighting_date DESC';
+  const [sightingsRows] = await conn.query(sightingsSql, [cryptidId]);
+  
+  res.render('learnmore', { 
+    cryptid: cryptidRows[0],
+    sightings: sightingsRows
+  });
+});
+
 // cryptids page
 app.get('/cryptids', (req, res) => {
    res.render('cryptids');
