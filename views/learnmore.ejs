@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/head.ejs') %>
+
+  <body class="forest-body">
+    <%- include('partials/nav.ejs') %>
+    <body>
+  <h1><%= cryptid.name %></h1>
+  
+  <img src="<%= cryptid.image_url %>" alt="<%= cryptid.name %>">
+  
+  <h2>Habitat</h2>
+  <p><%= cryptid.habitat %></p>
+  
+  <h2>Description</h2>
+  <p><%= cryptid.description %></p>
+  
+  <h2>Sightings</h2>
+  <% if (sightings.length > 0) { %>
+    <ul>
+      <% sightings.forEach(sighting => { %>
+        <li>
+          <strong><%= new Date(sighting.sighting_date).toLocaleDateString() %></strong>
+          <% if (sighting.description) { %>
+            <p><%= sighting.description %></p>
+          <% } %>
+          <% if (sighting.image_url) { %>
+            <img src="<%= sighting.image_url %>" alt="Sighting">
+          <% } %>
+        </li>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p>No sightings recorded yet.</p>
+  <% } %>
+  
+  <%- include('partials/footer.ejs') %>
+</body>
+</html>
