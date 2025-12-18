@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         await loadAvatars();
         attachAvatarListeners();
+        signupValidation();
     } catch (err) {
         console.error('Error initializing avatar carousel:', err);
     }
@@ -47,4 +48,137 @@ function attachAvatarListeners() {
     } catch (err) {
         console.error('Error attaching avatar listeners:', err);
     }
+}
+
+function signupValidation() {
+    //values of inputs
+    const username = document.getElementById("username");
+    const firstname = document.getElementById("firstname");
+    const lastname = document.getElementById("lastname");
+    const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirmPassword");
+
+    //span messages inner small
+    const usernameErr = document.querySelector("#username-signuperr small");
+    const firstnameErr = document.querySelector("#firstname-signuperr small");
+    const lastnameErr = document.querySelector("#last_name-signuperr small");
+    const passwordErr = document.querySelector("#password-signuperr small");
+    const confirmpasswordErr = document.querySelector("#confirmpassword-signuperr small");
+
+    const form = document.querySelector("form[action='/signup']");
+
+    //hide the errors
+    [usernameErr, firstnameErr, lastnameErr, passwordErr, confirmpasswordErr].forEach(err => {
+        err.style.display = "none";
+    });
+
+    //eventlisteners
+    username.addEventListener("input", () => {
+        //empty check
+        if (username.value.trim() === "") {
+            usernameErr.style.display = "none";
+            return;    
+        }
+        //space check
+        if (/\s/.test(username.value)) {
+            usernameErr.textContent = "Username cannot contain spaces.";
+            usernameErr.style.display = "inline";
+            return;
+        }
+        //length check
+        if (username.value.length < 4) {
+            usernameErr.textContent = "Username is too short.";
+            usernameErr.style.display = "inline";
+            return;
+        }
+        usernameErr.style.display = "none";
+    });
+
+    //First name
+    firstname.addEventListener("input", () => {
+        if (!/^[A-Za-z]*$/.test(firstname.value)) {
+            firstnameErr.textContent = "Please enter letters only.";
+            firstnameErr.style.display = "inline";
+        } else {
+            firstnameErr.style.display = "none";
+        }
+    });
+
+    //Last name
+    lastname.addEventListener("input", () => {
+        if (!/^[A-Za-z]*$/.test(lastname.value)) {
+            lastnameErr.textContent = "Please enter letters only.";
+            lastnameErr.style.display = "inline";
+        } else {
+            lastnameErr.style.display = "none";
+        }
+    });
+
+    //Password length
+    password.addEventListener("input", () => {
+
+        if (password.value.trim() === "") {
+            passwordErr.style.display = "none";
+            return;
+        }
+        if (password.value.length < 6) {
+            passwordErr.textContent = "Password is too short.";
+            passwordErr.style.display = "inline";
+            return;
+        } else {
+            passwordErr.style.display = "none";
+        }
+    });
+
+    //Final validation on submit
+    form.addEventListener("submit", (e) => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        let valid = true;
+
+        //username on button press
+        if (username.value.trim().length < 4) {
+            usernameErr.textContent = "Username is too short!";
+            usernameErr.style.display = "inline";
+            valid = false;
+        }
+
+        if (/\s/.test(username.value)) {
+            usernameErr.textContent = "Username cannot contain spaces.";
+            usernameErr.style.display = "inline";
+            valid = false;
+        }
+
+
+        //firstname on button press
+        if (!/^[A-Za-z]*$/.test(firstname.value)) {
+            firstnameErr.textContent = "Please enter letters only.";
+            firstnameErr.style.display = "inline";
+            valid = false;
+
+        }
+
+        //lastname on button press
+        if (!/^[A-Za-z]*$/.test(lastname.value)) {
+            lastnameErr.textContent = "Please enter letters only.";
+            lastnameErr.style.display = "inline";
+            valid = false;
+        }
+
+        //password on button
+        if (password.value.length < 6) {
+            passwordErr.textContent = "Password is too short.";
+            passwordErr.style.display = "inline";
+            valid = false;
+        }
+
+        //confirm on button
+        if (password.value !== confirmPassword.value) {
+            confirmpasswordErr.textContent = "Password does not match.";
+            confirmpasswordErr.style.display = "inline";
+            valid = false;
+        }
+
+        //prevent from doing its action if not valid
+        if (!valid) e.preventDefault();
+    });
 }

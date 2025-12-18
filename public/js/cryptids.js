@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
+    //modal element
     const modalEl = document.getElementById('cryptidDetailModal');
     if (!modalEl) return;
 
+    //bootstrap
     const bootstrapModal = window.bootstrap
         ? new bootstrap.Modal(modalEl)
         : null;
 
+    //element constants
     const titleEl = document.getElementById('cryptidModalTitle');
     const imgEl = document.getElementById('cryptidModalImage');
     const noImgEl = document.getElementById('cryptidModalNoImage');
@@ -17,8 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const logLinkEl = document.getElementById('cryptidModalLogSighting');
     const sightingCountEl = document.getElementById('cryptidModalSightingCount');
 
+    //set text function
     function setText(el, value, fallback) {
+        //check if it exists
         if (!el) return;
+        //set text
         if (value !== undefined && value !== null && String(value).trim() !== '') {
             el.textContent = value;
         } else {
@@ -26,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    //loading
     function showLoadingState() {
         setText(titleEl, 'Loading...', '');
         setText(descEl, 'Loading details...', '');
@@ -46,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    //pull and fill out cryptid info
     async function loadCryptidDetails(id) {
         try {
             showLoadingState();

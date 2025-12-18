@@ -62,6 +62,50 @@ app.use((req, res, next) => {
    next();
 });
 
+//helper function for pulling specific sighting by user id
+async function getSightingById(id) {
+   //query db gathering sighting info by user id
+   const [rows] = await conn.query(
+      `
+      SELECT
+         s.sighting_id,
+         s.userId,
+         s.cryptid_id,
+         s.sighting_date,
+         s.description,
+         s.danger_level,
+         s.location_name
+      FROM sightings s
+      WHERE s.sighting_id = ?
+      `,
+      [id]
+   );
+   //return it or null
+   return rows[0] || null;
+}
+
+//helper function for formating sql date/time for inline html
+function formatDateTimeForInputs(mysqlDateTime) {
+   //check for null
+   if (!mysqlDateTime) {
+      return { dateForInput: '', timeForInput: '' };
+   }
+   //check for bad input
+   const d = new Date(mysqlDateTime);
+   if (isNaN(d.getTime())) {
+      return { dateForInput: '', timeForInput: '' };
+   }
+
+   //convert date to string
+   const iso = d.toISOString();
+   //cut parts off of the string
+   const dateForInput = iso.slice(0, 10);  //year/month/day
+   const timeForInput = iso.slice(11, 16); //hour/minute
+
+   //return pieces
+   return { dateForInput, timeForInput };
+}
+
 /********** ROUTES GO HERE ***************/
 
 app.get('/login', (req, res) => {
@@ -120,198 +164,328 @@ app.get('/cryptids', async (req, res) => {
 
 // sightings page
 app.get('/sightings', isAuthenticated, async (req, res) => {
-  try {
-    const mode = req.query.mode || 'cryptid';
-    const cryptidId = req.query.cryptid_id || '';
-    const locationName = req.query.location_name || '';
-    const order = req.query.order === 'oldest' ? 'oldest' : 'newest';
-    const yearFrom = req.query.year_from || '';
-    const yearTo = req.query.year_to || '';
+   try {
+      //gather info from fields
+      const mode = req.query.mode || 'cryptid';
+      const cryptidId = req.query.cryptid_id || '';
+      const locationName = req.query.location_name || '';
+      const order = req.query.order === 'oldest' ? 'oldest' : 'newest';
+      const yearFrom = req.query.year_from || '';
+      const yearTo = req.query.year_to || '';
 
-    const params = [];
-    let where = 'WHERE 1=1';
+      const params = [];
+      let where = 'WHERE 1=1';
 
-    if (mode === 'cryptid' && cryptidId) {
-      where += ' AND s.cryptid_id = ?';
-      params.push(cryptidId);
-    }
+      //search options
+      //for by cryptid
+      if (mode === 'cryptid' && cryptidId) {
+         where += ' AND s.cryptid_id = ?';
+         params.push(cryptidId);
+      }
 
-    if (mode === 'location' && locationName) {
-      where += ' AND s.location_name = ?';
-      params.push(locationName);
-    }
+      //for by location
+      if (mode === 'location' && locationName) {
+         where += ' AND s.location_name = ?';
+         params.push(locationName);
+      }
 
-    if (mode === 'mine' && req.session.user) {
-      where += ' AND s.userId = ?';
-      params.push(req.session.user.id);
-    }
+      //for by user
+      if (mode === 'mine' && req.session.user) {
+         where += ' AND s.userId = ?';
+         params.push(req.session.user.id);
+      }
 
-    if (yearFrom) {
-      where += ' AND YEAR(s.sighting_date) >= ?';
-      params.push(yearFrom);
-    }
+      //start year
+      if (yearFrom) {
+         where += ' AND YEAR(s.sighting_date) >= ?';
+         params.push(yearFrom);
+      }
 
-    if (yearTo) {
-      where += ' AND YEAR(s.sighting_date) <= ?';
-      params.push(yearTo);
-    }
+      //end year
+      if (yearTo) {
+         where += ' AND YEAR(s.sighting_date) <= ?';
+         params.push(yearTo);
+      }
 
-    const orderSql =
-      order === 'oldest' ? 'ORDER BY s.sighting_date ASC' : 'ORDER BY s.sighting_date DESC';
+      //build sql order
+      const orderSql =
+         order === 'oldest' ? 'ORDER BY s.sighting_date ASC' : 'ORDER BY s.sighting_date DESC';
 
-    const sightingsSql = `
-      SELECT
-        s.sighting_id,
-        s.sighting_date,
-        s.description,
-        s.location_name,
-        c.name AS cryptid_name,
-        u.username AS reported_by
-      FROM sightings s
-      JOIN cryptids c ON c.cryptid_id = s.cryptid_id
-      LEFT JOIN users u ON u.userId = s.userId
-      ${where}
-      ${orderSql}
-    `;
+      //build sql query
+      const sightingsSql = `
+         SELECT
+            s.sighting_id,
+            s.sighting_date,
+            s.description,
+            s.location_name,
+            s.userId,
+            c.name AS cryptid_name,
+            u.username AS reported_by
+         FROM sightings s
+         JOIN cryptids c ON c.cryptid_id = s.cryptid_id
+         LEFT JOIN users u ON u.userId = s.userId
+         ${where}
+         ${orderSql}
+      `;
 
-    const [sightings] = await conn.query(sightingsSql, params);
+      //query the db and store the info
+      const [sightings] = await conn.query(sightingsSql, params);
 
-    //cryptid list dropdown
-    const [cryptids] = await conn.query(
-      'SELECT cryptid_id, name FROM cryptids ORDER BY name'
-    );
+      //cryptid list dropdown
+      const [cryptids] = await conn.query(
+         'SELECT cryptid_id, name FROM cryptids ORDER BY name'
+      );
 
-    //years dropdown
-    const [yearRows] = await conn.query(
-      'SELECT DISTINCT YEAR(sighting_date) AS y FROM sightings ORDER BY y DESC'
-    );
-    const years = yearRows.map(r => r.y);
+      //years dropdown
+      const [yearRows] = await conn.query(
+         'SELECT DISTINCT YEAR(sighting_date) AS y FROM sightings ORDER BY y DESC'
+      );
+      const years = yearRows.map(r => r.y);
 
-    res.render('sightings', {
-      sightings,
-      cryptids,
-      years,
-      mode,
-      order,
-      yearFrom,
-      yearTo,
-      locationName,
-      selectedCryptidId: cryptidId,
-      error: req.session.error || null
-    });
+      //render the page and pass all the info in
+      res.render('sightings', {
+         sightings,
+         cryptids,
+         years,
+         mode,
+         order,
+         yearFrom,
+         yearTo,
+         locationName,
+         selectedCryptidId: cryptidId,
+         error: req.session.error || null
+      });
 
-    req.session.error = null;
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading sightings.');
-  }
+      req.session.error = null;
+   } catch (err) {
+      console.error(err);
+      res.status(500).send('Error loading sightings.');
+   }
 });
 
 //new sighting page
 app.get('/sightings/new', isAuthenticated, async (req, res) => {
-  try {
-    const [cryptids] = await conn.query(
-      'SELECT cryptid_id, name FROM cryptids ORDER BY name'
-    );
+   try {
+      //get the cryptids for the drop down
+      const [cryptids] = await conn.query(
+         'SELECT cryptid_id, name FROM cryptids ORDER BY name'
+      );
 
-    const message = req.session.message || null;
-    const error = req.session.error || null;
-    req.session.message = null;
-    req.session.error = null;
+      const message = req.session.message || null;
+      const error = req.session.error || null;
+      req.session.message = null;
+      req.session.error = null;
 
-    const selectedCryptidId = req.query.cryptid_id || '';
+      const selectedCryptidId = req.query.cryptid_id || '';
 
-    res.render('sightings-new', {
-      cryptids,
-      message,
-      error,
-      selectedCryptidId
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading new sighting form.');
-  }
+      //render and pass in info
+      res.render('sightings-new', {
+         cryptids,
+         message,
+         error,
+         selectedCryptidId
+      });
+   } catch (err) {
+      console.error(err);
+      res.status(500).send('Error loading new sighting form.');
+   }
 });
 
 //submitting new sighting
 app.post('/sightings/new', isAuthenticated, async (req, res) => {
-  try {
-    const userId = req.session.user.id;
-    const {
-      cryptid_id,
-      location_name,
-      date,
-      time,
-      details,
-      mood //danger rating
-    } = req.body;
+   try {
+      //get user
+      const userId = req.session.user.id;
+      const {
+         cryptid_id,
+         location_name,
+         date,
+         time,
+         details,
+         mood //danger rating
+      } = req.body;
 
-    if (!cryptid_id || !location_name || !date) {
-      req.session.error = 'Cryptid, location, and date are required.';
-      return res.redirect('/sightings/new');
-    }
-
-    //sighting datetime
-    const sightingTime = time && time.trim() !== '' ? time : '00:00';
-    const sightingDateTime = `${date} ${sightingTime}:00`;
-
-    //danger level
-    let dangerLevel = parseInt(mood, 10);
-    if (isNaN(dangerLevel) || dangerLevel < 1 || dangerLevel > 5) {
-      dangerLevel = 3;
-    }
-
-    //insert the sighting
-    await conn.query(
-      `INSERT INTO sightings
-        (userId, cryptid_id, location_name, sighting_date, description, danger_level)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [userId, cryptid_id, location_name, sightingDateTime, details || null, dangerLevel]
-    );
-
-    //update cryptid known_regions
-    const [cryptidRows] = await conn.query(
-      'SELECT known_regions FROM cryptids WHERE cryptid_id = ?',
-      [cryptid_id]
-    );
-
-    if (cryptidRows.length > 0) {
-      const locName = location_name.trim();
-      let knownRegions = cryptidRows[0].known_regions || '';
-      let shouldUpdate = false;
-
-      if (!knownRegions.trim()) {
-        //start with this location
-        knownRegions = locName;
-        shouldUpdate = true;
-      } else {
-        const regions = knownRegions
-          .split(',')
-          .map(r => r.trim())
-          .filter(Boolean);
-
-        const lowerSet = regions.map(r => r.toLowerCase());
-        if (!lowerSet.includes(locName.toLowerCase())) {
-          knownRegions = knownRegions + ', ' + locName;
-          shouldUpdate = true;
-        }
+      //make sure input exists
+      if (!cryptid_id || !location_name || !date) {
+         req.session.error = 'Cryptid, location, and date are required.';
+         return res.redirect('/sightings/new');
       }
 
-      if (shouldUpdate) {
-        await conn.query(
-          'UPDATE cryptids SET known_regions = ? WHERE cryptid_id = ?',
-          [knownRegions, cryptid_id]
-        );
-      }
-    }
+      //sighting datetime
+      const sightingTime = time && time.trim() !== '' ? time : '00:00';
+      const sightingDateTime = `${date} ${sightingTime}:00`;
 
-    req.session.message = 'Sighting saved successfully.';
-    res.redirect('/sightings?mode=mine');
-  } catch (err) {
-    console.error(err);
-    req.session.error = 'There was a problem saving your sighting.';
-    res.redirect('/sightings/new');
-  }
+      //danger level
+      let dangerLevel = parseInt(mood, 10);
+      if (isNaN(dangerLevel) || dangerLevel < 1 || dangerLevel > 5) {
+         dangerLevel = 3;
+      }
+
+      //insert the sighting
+      await conn.query(
+         `INSERT INTO sightings
+         (userId, cryptid_id, location_name, sighting_date, description, danger_level)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+         [userId, cryptid_id, location_name, sightingDateTime, details || null, dangerLevel]
+      );
+
+      //update cryptid known_regions
+      const [cryptidRows] = await conn.query(
+         'SELECT known_regions FROM cryptids WHERE cryptid_id = ?',
+         [cryptid_id]
+      );
+
+      //check regions
+      if (cryptidRows.length > 0) {
+         const locName = location_name.trim();
+         let knownRegions = cryptidRows[0].known_regions || '';
+         let shouldUpdate = false;
+
+         if (!knownRegions.trim()) {
+         //start with this location
+         knownRegions = locName;
+         shouldUpdate = true;
+         } else {
+         const regions = knownRegions
+            .split(',')
+            .map(r => r.trim())
+            .filter(Boolean);
+
+         const lowerSet = regions.map(r => r.toLowerCase());
+         if (!lowerSet.includes(locName.toLowerCase())) {
+            knownRegions = knownRegions + ', ' + locName;
+            shouldUpdate = true;
+         }
+         }
+
+         if (shouldUpdate) {
+            await conn.query(
+               'UPDATE cryptids SET known_regions = ? WHERE cryptid_id = ?',
+               [knownRegions, cryptid_id]
+            );
+         }
+      }
+
+      res.redirect('/sightings?mode=mine');
+   } catch (err) {
+      console.error(err);
+      req.session.error = 'There was a problem saving your sighting.';
+      res.redirect('/sightings/new');
+   }
+});
+
+//sightings edit page
+app.get('/sightings/:id/edit', isAuthenticated, async (req, res) => {
+   try {
+      //get user
+      const sightingId = req.params.id;
+      //get sighting from user id
+      const sighting = await getSightingById(sightingId);
+
+      //null check
+      if (!sighting) {
+         return res.status(404).render('error', { error: 'Sighting not found.' });
+      }
+
+      //ownership check
+      if (String(sighting.userId) !== String(req.session.user.id)) {
+         return res.status(403).render('error', { error: 'You cannot edit this sighting.' });
+      }
+
+      //load cryptids for dropdown
+      const [cryptids] = await conn.query(
+         'SELECT cryptid_id, name FROM cryptids ORDER BY name'
+      );
+
+      //format the date and time
+      const { 
+         dateForInput, timeForInput 
+      } = formatDateTimeForInputs(sighting.sighting_date);
+
+      const message = req.session.message || null;
+      const error = req.session.error || null;
+      req.session.message = null;
+      req.session.error = null;
+
+      //render and pass info in
+      res.render('sightings-edit', {
+         cryptids,
+         sighting,
+         dateForInput,
+         timeForInput,
+         message,
+         error
+      });
+   } catch (err) {
+      console.error(err);
+      res.status(500).render('error', { error: 'Error loading edit sighting form.' });
+   }
+});
+
+//sightings edit submit form
+app.post('/sightings/:id/edit', isAuthenticated, async (req, res) => {
+   try {
+      //get user
+      const sightingId = req.params.id;
+      //get sighting by user id
+      const original = await getSightingById(sightingId);
+
+      //null check
+      if (!original) {
+         return res.status(404).render('error', { error: 'Sighting not found.' });
+      }
+
+      //ownership check
+      if (String(original.userId) !== String(req.session.user.id)) {
+         return res.status(403).render('error', { error: 'You cannot edit this sighting.' });
+      }
+
+      const {
+         cryptid_id,
+         location_name,
+         date,
+         time,
+         details,
+         mood
+      } = req.body;
+
+      //make sure input exists
+      if (!cryptid_id || !location_name || !date) {
+         req.session.error = 'Cryptid, location, and date are required.';
+         return res.redirect(`/sightings/${sightingId}/edit`);
+      }
+
+      //build datetime
+      const sightingTime = time && time.trim() !== '' ? time : '00:00';
+      const sightingDateTime = `${date} ${sightingTime}:00`;
+
+      //danger level
+      let dangerLevel = parseInt(mood, 10);
+      if (isNaN(dangerLevel) || dangerLevel < 1 || dangerLevel > 5) {
+         dangerLevel = 3;
+      }
+
+      //query sql update
+      await conn.query(
+         `
+         UPDATE sightings
+         SET
+         cryptid_id = ?,
+         location_name = ?,
+         sighting_date = ?,
+         description = ?,
+         danger_level = ?
+         WHERE sighting_id = ?
+         `,
+         [cryptid_id, location_name, sightingDateTime, details || null, dangerLevel, sightingId]
+      );
+
+      res.redirect('/sightings?mode=mine');
+   } catch (err) {
+      console.error(err);
+      req.session.error = 'There was a problem updating your sighting.';
+      res.redirect(`/sightings/${req.params.id}/edit`);
+   }
 });
 
 // rubric page

@@ -70,7 +70,7 @@ async function locationDropdown() {
             locationSelect.appendChild(opt);
         });
 
-        const preselected = locationSelect.dataset.selected;
+        const preselected = locationSelect.dataset.current;
         if (preselected) {
             Array.from(locationSelect.options).forEach(opt => {
             if (opt.value === preselected) {
