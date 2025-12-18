@@ -376,7 +376,6 @@ app.post('/login', async (req, res) => {
    }
 });
 
-
 app.post('/signup', async (req, res) => {
    try {
       //get the contents of the POST
@@ -519,6 +518,39 @@ app.get("/admindashboard", isAuthenticated, adminOnly, async (req, res) => {
    let [cryptidNames] = await conn.query(namesSQL);
 
    res.render('admindashboard', {names: cryptidNames, users: usernames, sighting: sightings});
+});
+
+//
+app.get("/admin/users", isAuthenticated, adminOnly, async (req, res) => {
+
+   const userId = req.query.id;
+   console.log('userid:', userId);
+
+
+   res.render('dashboardedit', {section: 'users'});
+});
+
+//
+app.get("/admin/sightings", isAuthenticated, adminOnly, async (req, res) => {
+   const sightingId = req.query.sighting;
+   console.log('sightingid:', sightingId);
+
+   res.render('dashboardedit', {section: 'sightings'});
+});
+
+//
+app.get("/admin/cryptids", isAuthenticated, adminOnly, async (req, res) => {
+   const cryptidId = req.query.cryptid;
+   console.log('cryptidid:', cryptidId);
+
+   res.render('dashboardedit', {section: 'cryptids'});
+});
+
+//
+app.get("/admin/addcryptid", isAuthenticated, adminOnly, async (req, res) => {
+
+
+   res.render('dashboardedit', {section: 'add_cryptid'});
 });
 
 /*****************************************/
