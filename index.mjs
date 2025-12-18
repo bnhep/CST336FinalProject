@@ -937,6 +937,45 @@ app.post("/admin/addcryptid", isAuthenticated, adminOnly, async (req, res) => {
   res.redirect("/admindashboard?message=Cryptid added successfully");
 });
 
+app.get("/admin/cryptids/delete", isAuthenticated, adminOnly, async (req, res) => {
+  try {
+    const cryptidId = req.query.id;
+
+    if (!cryptidId) {
+      return res.redirect("/admindashboard?error=Missing+cryptid+id");
+    }
+
+    const deleteSQL = `
+      DELETE FROM cryptids
+      WHERE cryptid_id = ?
+    `;
+
+    await conn.query(deleteSQL, [cryptidId]);
+
+    res.redirect("/admindashboard?message=Cryptid+deleted");
+  } catch (err) {
+    console.error("Error deleting cryptid:", err);
+    res.redirect("/admindashboard?error=Cryptid+delete+failed");
+  }
+});
+
+app.post("/admin/cryptids/delete", isAuthenticated, adminOnly, async (req, res) => {
+  try {
+    const { cryptid_id } = req.body;
+
+    if (!cryptid_id) {
+      return res.redirect("/admindashboard?message=Missing cryptid id");
+    }
+
+    await conn.query("DELETE FROM cryptids WHERE cryptid_id = ?", [cryptid_id]);
+
+    res.redirect("/admindashboard?message=Cryptid deleted successfully");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/admindashboard?message=Failed to delete cryptid");
+  }
+});
+
 /*****************************************/
 
 /*******APIS CAN GO HERE*************/
