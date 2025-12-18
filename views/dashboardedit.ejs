@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/head.ejs') %>
+
+  <body class="forest-body">
+    <%- include('partials/nav.ejs') %>
+
+    <main class="page-main">
+      <section class="container py-5">
+        <header class="page-header mb-4">
+            <h1 class="page-title">Admin Dashboard</h1>
+
+        <% if (typeof error !== "undefined" && error) { %>
+          <div class="alert alert-danger alert-dismissible w-50 mx-auto text-center" role="alert">
+            <%= error %>
+            <button type="button" class="btn-close btn-dark no-focus" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+
+        <% if (typeof message !== "undefined" && message) { %>
+          <div class="alert alert-success alert-dismissible w-50 mx-auto text-center" role="alert">
+            <%= message %>
+            <button type="button" class="btn-close btn-dark no-focus" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+
+
+        </header>
+        <div class="forest-card">
+        <% if (section === 'users') { %>
+            <h2>Edit User</h2>
+            <form method="POST" action="/admin/users/update" class="row g-3">
+            <!-- user fields -->
+              <!-- username -->
+              <div class="col-12">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username"
+                      class="form-control forest-input"
+                      value="<%= profile && profile[0] ? profile[0].username : '' %>">
+              </div>
+
+              <!-- password -->
+              <div class="col-12">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password"
+                      class="form-control forest-input"
+                      placeholder="Enter new password" required>
+              </div>
+
+              <!-- email -->
+              <div class="col-12">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email"
+                      class="form-control forest-input"
+                      value="<%= profile && profile[0] ? profile[0].email : '' %>">
+              </div>
+
+              <!-- role -->
+              <div class="col-12">
+                <label for="role" class="form-label">Role</label>
+                <select id="role" name="role" class="form-select forest-input">
+                  <option value="user" <%= profile && profile[0] && profile[0].role === 'user' ? 'selected' : '' %>>User</option>
+                  <option value="admin" <%= profile && profile[0] && profile[0].role === 'admin' ? 'selected' : '' %>>Admin</option>
+                </select>
+              </div>
+
+              <!-- first name -->
+              <div class="col-12">
+                <label for="first_name" class="form-label">First Name</label>
+                <input type="text" id="first_name" name="first_name"
+                      class="form-control forest-input"
+                      value="<%= profile && profile[0] ? profile[0].first_name : '' %>">
+              </div>
+
+              <!-- last name -->
+              <div class="col-12">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" id="last_name" name="last_name"
+                      class="form-control forest-input"
+                      value="<%= profile && profile[0] ? profile[0].last_name : '' %>">
+              </div>
+
+              <!-- biography -->
+              <div class="col-12">
+                <label for="bio" class="form-label">Biography</label>
+                <textarea id="bio" name="bio" rows="4"
+                          class="form-control forest-input"><%= profile && profile[0] ? profile[0].bio : '' %></textarea>
+              </div>
+
+              <!-- avatar url -->
+              <div class="col-12">
+                <label for="avatar_url" class="form-label">Avatar URL</label>
+                <input type="text" id="avatar_url" name="avatar_url"
+                      class="form-control forest-input"
+                      value="<%= profile && profile[0] ? profile[0].avatar_url : '' %>">
+              </div>
+
+              <!-- contact -->
+              <div class="col-12">
+                <label for="contact" class="form-label">Contact</label>
+                <input type="text" id="contact" name="contact"
+                      class="form-control forest-input"
+                      value="<%= profile && profile[0] ? profile[0].contact : '' %>">
+              </div>
+
+              <!-- hidden userid -->
+              <input type="hidden" name="userId" value="<%= profile && profile[0] ? profile[0].userId : '' %>">
+
+              <!-- buttons -->
+              <div class="col-12 d-flex justify-content-between">
+                <button type="submit" class="btn btn-forest">
+                  <i class="bi bi-check-circle me-1"></i> Save Changes
+                </button>
+
+                <a href="/admin/users/delete?id=<%= profile && profile[0] ? profile[0].userId : '' %>" class="btn btn-danger btn-sm">
+                  <i class="bi bi-trash me-1"></i> Delete User
+                </a>
+              </div>
+
+            </form>
+
+        <% } else if (section === 'sightings') { %>
+            <h2>Edit Sighting</h2>
+            <form method="POST" action="/admin/sightings/update" class="row g-3">
+
+              <!-- userId -->
+              <div class="col-12">
+                <label for="userId" class="form-label">User</label>
+                <select id="userId" name="userId" class="form-select forest-input" required>
+                  <% users.forEach(function(u) { %>
+                    <option value="<%= u.userId %>" 
+                      <%= sighting && sighting[0] && sighting[0].userId === u.userId ? 'selected' : '' %>>
+                      (ID: <%= u.userId %>) <%= u.username %> 
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <!-- cryptid_id -->
+              <div class="col-12">
+                <label for="cryptid_id" class="form-label">Cryptid</label>
+                <select id="cryptid_id" name="cryptid_id" class="form-select forest-input"
+                  data-current="<%= sighting && sighting[0] ? sighting[0].cryptid_id : '' %>" required>
+                </select>
+              </div>
+
+              <!-- sighting_date -->
+              <div class="col-12">
+                <label for="sighting_date" class="form-label">Sighting Date</label>
+                <input type="datetime-local" id="sighting_date" name="sighting_date" class="form-control forest-input"
+                      value="<%= sighting && sighting[0] && sighting[0].sighting_date 
+                                  ? sighting[0].sighting_date.toISOString().slice(0,16) 
+                                  : '' %>">
+              </div>
+
+              <!-- description -->
+              <div class="col-12">
+                <label for="description" class="form-label">Description</label>
+                <textarea id="description" name="description" rows="3"
+                  class="form-control forest-input"><%= sighting && sighting[0] ? sighting[0].description : '' %>
+                </textarea>
+              </div>
+
+              <!-- image_url -->
+              <div class="col-12">
+                <label for="image_url" class="form-label">Image URL</label>
+                <input type="text" id="image_url" name="image_url" class="form-control forest-input"
+                      value="<%= sighting && sighting[0] ? sighting[0].image_url : '' %>">
+              </div>
+
+              <!-- danger_level -->
+              <div class="col-12">
+                <label for="danger_level" class="form-label">Danger Level (1–5)</label>
+                <input type="number" id="danger_level" name="danger_level" min="1" max="5"
+                      class="form-control forest-input"
+                      value="<%= sighting && sighting[0] ? sighting[0].danger_level : '' %>">
+              </div>
+
+              <!-- location_name -->
+              <div class="col-12">
+                <label for="location_name" class="form-label">Location</label>
+                <select id="location_name" name="location_name" class="form-select forest-input" 
+                  data-current="<%= sighting && sighting[0] ? sighting[0].location_name : '' %>" required>
+                  <!-- do this in the script file because api fetch -->
+                </select>
+              </div>
+
+              <!-- hidden timestamps -->
+              <input type="hidden" name="updated_at" value="<%= new Date().toISOString() %>">
+              <input type="hidden" name="sighting_id" value="<%= sighting && sighting[0] ? sighting[0].sighting_id : '' %>">
+              <!-- buttons -->
+              <div class="col-12 d-flex justify-content-between">
+                <button type="submit" class="btn btn-forest">
+                  <i class="bi bi-check-circle me-1"></i> Save Sighting
+                </button>
+
+                <a href="/admin/sightings/delete?id=<%= sighting && sighting[0] ? sighting[0].sighting_id : '' %>" 
+                  class="btn btn-danger btn-sm">
+                  <i class="bi bi-trash me-1"></i> Delete Sighting
+                </a>
+              </div>
+            </form>
+
+        <% } else if (section === 'cryptids') { %>
+            <h2>Edit Cryptid</h2>
+            <form method="POST" action="/admin/cryptids/update" class="row g-3">
+            <!-- cryptid fields -->
+            </form>
+
+        <% } else if (section === 'add_cryptid') { %>
+            <h2>Add Cryptid</h2>
+            <form method="POST" action="/admin/addcryptid" class="row g-3">
+            <!-- add cryptid fields -->
+            </form>
+        <% } %>
+        </div>
+
+      </section>
+    </main>
+
+    <%- include('partials/footer.ejs') %>
+    <script src="/js/dashboardedit.js"></script>
+  </body>
+</html>
