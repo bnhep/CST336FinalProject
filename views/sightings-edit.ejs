@@ -8,9 +8,9 @@
     <main class="page-main">
       <section class="container py-5">
         <header class="page-header mb-4">
-          <h1 class="page-title">Log a New Sighting</h1>
+          <h1 class="page-title">Edit Sighting</h1>
           <p class="page-subtitle">
-            Tell us what you saw, where, and when. The forest remembers.
+            Update what you saw, where, and when.
           </p>
 
           <% if (error) { %>
@@ -22,7 +22,7 @@
         </header>
 
         <div class="forest-card">
-          <form class="row g-4" action="/sightings/new" method="post">
+          <form class="row g-4" action="/sightings/<%= sighting.sighting_id %>/edit" method="post">
             <!-- cryptid dropdown -->
             <div class="col-md-6">
               <label for="cryptidId" class="form-label">Cryptid</label>
@@ -37,7 +37,7 @@
                   <% cryptids.forEach(c => { %>
                     <option
                       value="<%= c.cryptid_id %>"
-                      <%= String(selectedCryptidId || '') === String(c.cryptid_id) ? 'selected' : '' %>
+                      <%= String(sighting.cryptid_id) === String(c.cryptid_id) ? 'selected' : '' %>
                     >
                       <%= c.name %>
                     </option>
@@ -54,6 +54,7 @@
                 name="location_name"
                 class="form-control forest-input"
                 required
+                data-selected="<%= sighting.location_name || '' %>"
               >
                 <option value="">Loading states...</option>
               </select>
@@ -66,6 +67,7 @@
                 class="form-control forest-input"
                 id="date"
                 name="date"
+                value="<%= dateForInput %>"
                 required
               >
             </div>
@@ -77,6 +79,7 @@
                 class="form-control forest-input"
                 id="time"
                 name="time"
+                value="<%= timeForInput %>"
               >
             </div>
 
@@ -87,8 +90,8 @@
                 name="details"
                 class="form-control forest-input"
                 rows="4"
-                placeholder="Describe what you experienced."
-              ></textarea>
+                placeholder="Describe sounds, shapes, lights, tracks, or anything that felt… off."
+              ><%= sighting.description || '' %></textarea>
             </div>
 
             <div class="col-md-6">
@@ -100,6 +103,7 @@
                 name="mood"
                 min="1"
                 max="5"
+                value="<%= sighting.danger_level || 3 %>"
               >
               <div class="d-flex justify-content-between tiny-labels">
                 <span>Docile</span>
@@ -109,11 +113,11 @@
             </div>
 
             <div class="col-12 d-flex justify-content-end gap-2">
-              <a href="/sightings" class="btn btn-ghost">
+              <a href="/sightings?mode=mine" class="btn btn-ghost">
                 Cancel
               </a>
               <button type="submit" class="btn btn-forest">
-                Save Sighting
+                Save Changes
               </button>
             </div>
           </form>
@@ -123,7 +127,7 @@
 
     <%- include('partials/footer.ejs') %>
 
-    <!-- new sightings js -->
+    <!-- same js as /sightings/new -->
     <script src="/js/sightingsnew.js"></script>
   </body>
 </html>
