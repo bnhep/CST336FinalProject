@@ -9,9 +9,6 @@
       <section class="container py-5">
         <header class="page-header mb-4">
           <h1 class="page-title">Edit Sighting</h1>
-          <p class="page-subtitle">
-            Update what you saw, where, and when.
-          </p>
 
           <% if (error) { %>
             <div class="alert alert-danger mt-2"><%= error %></div>
@@ -29,7 +26,7 @@
               <select
                 id="cryptidId"
                 name="cryptid_id"
-                class="form-control forest-input"
+                class="form-select forest-input"
                 required
               >
                 <option value="">Select a cryptid...</option>
@@ -52,7 +49,7 @@
               <select
                 id="location"
                 name="location_name"
-                class="form-control forest-input"
+                class="form-select forest-input"
                 required
                 data-selected="<%= sighting.location_name || '' %>"
               >
