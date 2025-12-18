@@ -80,6 +80,16 @@ function signupValidation() {
         }
     });
 
+    //username spacing
+    username.addEventListener("input", () => {
+        if (/\s/.test(username.value)) {
+            usernameErr.textContent = "Username cannot contain spaces.";
+            usernameErr.style.display = "inline";
+        } else {
+            usernameErr.style.display = "none";
+        }
+    });
+
 
     //First name
     firstname.addEventListener("input", () => {
@@ -113,6 +123,7 @@ function signupValidation() {
 
     //Final validation on submit
     form.addEventListener("submit", (e) => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
         let valid = true;
 
         //username on button press
@@ -121,6 +132,13 @@ function signupValidation() {
             usernameErr.style.display = "inline";
             valid = false;
         }
+
+        if (/\s/.test(username.value)) {
+            usernameErr.textContent = "Username cannot contain spaces.";
+            usernameErr.style.display = "inline";
+            valid = false;
+        }
+
 
         //firstname on button press
         if (!/^[A-Za-z]*$/.test(firstname.value)) {
