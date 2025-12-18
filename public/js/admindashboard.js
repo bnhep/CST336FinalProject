@@ -20,6 +20,13 @@ function manageUserSelect() {
                 manageUserLink.classList.add("disabled");
             }
         });
+        //validate whether the value is 0
+        // Prevent navigation if disabled
+        manageUserLink.addEventListener('click', function (e) {
+            if (userSelect.value === "0") {
+                e.preventDefault();
+            }
+        });
     }
 }
 
@@ -30,11 +37,18 @@ function manageSightingSelect() {
         sightingSelect.addEventListener('change', function () {
             let selectedId = this.value;
             if (selectedId !== "0") {
-                manageSightingLink.href = `/admin/sightings?id=${selectedId}`;
+                manageSightingLink.href = `/admin/sightings?sighting=${selectedId}`;
                 manageSightingLink.classList.remove("disabled");
             } else {
                 manageSightingLink.href = "#";
                 manageSightingLink.classList.add("disabled");
+            }
+        });
+        //validate whether the value is 0
+        // Prevent navigation if disabled
+        manageSightingLink.addEventListener('click', function (e) {
+            if (sightingSelect.value === "0") {
+                e.preventDefault();
             }
         });
     }
@@ -47,12 +61,20 @@ function manageCryptidSelect() {
         cryptidSelect.addEventListener('change', function () {
             let selectedId = this.value;
             if (selectedId !== "0") {
-                manageCryptidLink.href = `/admin/cryptids?id=${selectedId}`;
+                manageCryptidLink.href = `/admin/cryptids?cryptid=${selectedId}`;
                 manageCryptidLink.classList.remove("disabled");
             } else {
                 manageCryptidLink.href = "#";
                 manageCryptidLink.classList.add("disabled");
             }
         });
+        //validate whether the value is 0
+        // Prevent navigation if disabled
+        manageCryptidLink.addEventListener('click', function (e) {
+            if (cryptidSelect.value === "0") {
+                e.preventDefault();
+            }
+        });
+
     }
 }
