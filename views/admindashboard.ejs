@@ -39,8 +39,11 @@
                 <!-- selectdropdown for users -->
                 <select id="userSelect" class="form-select forest-input mb-3">
                     <option selected disabled value="0">Choose a user</option>
-                    <option value="1">User A</option>
-                    <option value="2">User B</option>
+                    <% for (user of users) { %>
+                    <option value="<%= user.userId %>">
+                        <%= user.username %>
+                    </option>
+                    <% } %>
                 </select>
                 <a id="manageUserLink" href="/admindashboard/users" class="btn btn-forest mt-auto">
                   <i class="bi bi-pencil-square me-1"></i> Manage</a>
@@ -60,8 +63,11 @@
                 <!-- selectdropdown for users -->
                 <select id="sightingSelect" class="form-select forest-input mb-3">
                     <option selected disabled value="0">Choose a sightings</option>
-                    <option value="1">Sightings A</option>
-                    <option value="2">Sightings B</option>
+                    <% for (sight of sighting) { %>
+                    <option value="<%= sight.sighting_id %>">
+                        Sighting <%= sight.sighting_id %>
+                    </option>
+                    <% } %>
                 </select>
                 <a id="manageSightingLink" href="/admindashboard/sightings" class="btn btn-forest mt-auto">
                   <i class="bi bi-pencil-square me-1"></i>Manage</a>
@@ -74,14 +80,17 @@
             <div class="forest-card cryptid-card h-100 shadow-sm">
                 <div class="card-body d-flex flex-column">
                 <i class="bi bi-clipboard2-plus fs-1 mb-3"></i>
-                <h5 class="card-title">Manage Sightings</h5>
+                <h5 class="card-title">Manage Cryptids</h5>
                 <p class="card-text page-subtitle">Edit, remove or add Cryptids.</p>
 
                 <!-- selectdropdown for users -->
                 <select id="cryptidSelect" class="form-select forest-input mb-3">
                     <option selected disabled value="0">Choose a Cryptid</option>
-                    <option value="1">Sightings A</option>
-                    <option value="2">Sightings B</option>
+                    <% for (name of names) { %>
+                    <option value="<%= name.cryptid_id %>">
+                        <%= name.name %>
+                    </option>
+                    <% } %>
                 </select>
 
                 <a id="manageCryptidLink" href="/admindashboard/cryptids" class="btn btn-forest mt-auto mb-3">
