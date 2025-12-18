@@ -309,46 +309,58 @@ app.get("/signup", (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-   //get the contents of the POST
-   let username = req.body.username;
-   let password = req.body.password;
-   //gets the username
-   let sql = `SELECT * 
-               FROM users 
-               WHERE username = ?`;
-   const [rows] = await conn.query(sql, [username]);
+   try {
+      // Get the contents of the POST
+      let username = req.body.username;
+      let password = req.body.password;
 
-   //username existence validation
-   if (rows.length === 0) {
-      return res.render('login', {error: 'Username not found.'});
-   }
+      // Query for the username
+      let sql = `SELECT *
+                  FROM users
+                  WHERE username = ?
+               `;
+      const [rows] = await conn.query(sql, [username]);
 
-   //if user exists get user contents
-   let user = rows[0];
-   let passwordHash = rows[0].password;
+      // Username existence validation
+      if (rows.length === 0) {
+         return res.render('login', { error: 'Username not found.' });
+      }
 
-   //check password match using bcrpyt
-   let match = await bcrypt.compare(password, passwordHash);
+      // If user exists, get user contents
+      let user = rows[0];
+      let passwordHash = user.password;
 
-   if (!match) {
-      return res.render('login', {error: 'Incorrect password.'});
-   }
+      // Check password match using bcrypt
+      let match = await bcrypt.compare(password, passwordHash);
 
-   //create a session for the user if succesful login
-   const returnTo = req.session.returnTo;
-   req.session.regenerate((err) => {
-      if (err) throw err;
+      if (!match) {
+         return res.render('login', { error: 'Incorrect password.' });
+      }
+
+      // Create a session for the user if successful login
+      const returnTo = req.session.returnTo;
+      req.session.regenerate((err) => {
+      if (err) {
+         console.error('Session regeneration failed:', err);
+         return res.status(500).render('login', { error: 'Login failed. Please try again.' });
+      }
+
       req.session.authenticated = true;
       req.session.user = {
-            id: user.userId,
-            user: user.username,
-            role: user.role,
-            avatar: user.avatar_url
+         id: user.userId,
+         user: user.username,
+         role: user.role,
+         avatar: user.avatar_url
       };
-   res.redirect(returnTo || '/welcome');
-   });
 
+      res.redirect(returnTo || '/welcome');
+      });
+   } catch (err) {
+      console.error('Error during login:', err);
+      res.status(500).render('login', { error: 'An unexpected error occurred. Please try again.' });
+   }
 });
+
 
 app.post('/signup', async (req, res) => {
    try {
@@ -405,21 +417,41 @@ app.get('/logout', isAuthenticated, (req, res) => {
 });
 
 app.get('/profile', isAuthenticated, async (req, res) => {
-   let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
-                     FROM users
-                     WHERE userId = ?`;
-   const [rows] = await conn.query(profileSQL,[req.session.user.id])
-   res.render('profile', {profile:rows, message: req.session.message, error: req.session.error})
-   req.session.message = null;
-   req.session.error = null;
+   try {
+      let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
+                        FROM users
+                        WHERE userId = ?
+      `;
+      const [rows] = await conn.query(profileSQL, [req.session.user.id]);
+
+      res.render('profile', {
+      profile: rows,
+      message: req.session.message,
+      error: req.session.error
+      });
+
+      // Clear session messages after rendering
+      req.session.message = null;
+      req.session.error = null;
+   } catch (err) {
+      console.error('Error fetching profile:', err);
+      res.status(500).render('error', { error: 'Failed to load profile.' });
+   }
 });
 
 app.get('/profile/edit', isAuthenticated, async (req, res) => {
-   let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
+   try {
+      let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
                      FROM users
-                     WHERE userId = ?`;
-   const [rows] = await conn.query(profileSQL,[req.session.user.id])
-   res.render('editprofile', {profile: rows })
+                     WHERE userId = ?
+      `;
+      const [rows] = await conn.query(profileSQL, [req.session.user.id]);
+
+      res.render('editprofile', { profile: rows });
+   } catch (err) {
+      console.error('Error fetching profile for edit:', err);
+      res.status(500).render('error', { error: 'Failed to load edit profile page.' });
+   }
 });
 
 //post of profile edit
@@ -449,20 +481,48 @@ app.post('/profile/edit', async (req, res) => {
    }
 });
 
+app.get("/admindashboard", isAuthenticated, adminOnly, async (req, res) => {
+   
+   let usersSQL = `SELECT 
+               userId,
+               username
+               FROM users
+               ORDER BY username;`;
+   let [usernames] = await conn.query(usersSQL);
 
-app.get("/admindashboard", isAuthenticated, adminOnly, (req, res) => {
-   res.render('admindashboard');
+
+   let sightingSQL = `SELECT sighting_id
+                      FROM sightings
+                      ORDER BY sighting_id;`;
+   let [sightings] = await conn.query(sightingSQL);
+
+   let namesSQL = `SELECT 
+               cryptid_id,
+               name
+               FROM cryptids
+               ORDER BY name`;
+   let [cryptidNames] = await conn.query(namesSQL);
+
+   res.render('admindashboard', {names: cryptidNames, users: usernames, sighting: sightings});
 });
 
 /*****************************************/
 
 /*******APIS CAN GO HERE*************/
 app.get('/api/avatars', async (req, res) => {
-   let avatars = `SELECT *
-                  FROM avatars`;
-   const [rows] = await conn.query(avatars)
-   res.send(rows);
+   try {
+      let avatars = `
+      SELECT *
+      FROM avatars
+      `;
+      const [rows] = await conn.query(avatars);
+      res.send(rows);
+   } catch (err) {
+      console.error('Error fetching avatars:', err);
+      res.status(500).json({ error: 'Failed to load avatars.' });
+   }
 });
+
 
 app.get('/api/cryptids', async (req, res) => {
    try {
