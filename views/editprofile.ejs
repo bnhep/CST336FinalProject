@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/head.ejs') %>
+  <body class="forest-body">
+    <%- include('partials/nav.ejs') %>
+
+    <main class="page-main">
+      <section class="container py-5 auth-section">
+        <div class="row justify-content-center">
+          <div class="col-md-10 col-lg-7 col-xl-6">
+            <div class="forest-card auth-card">
+            <header class="page-header mb-4">
+            <h1 class="page-title text-center">Edit Profile</h1>
+            <p class="page-subtitle mx-auto text-center">Update your info and choose an avatar</p>
+            </header>
+
+              <% if (typeof error !== "undefined" && error) { %>
+                <div class="alert alert-danger py-2">
+                  <%= error %>
+                </div>
+              <% } %>
+
+              <% if (typeof message !== "undefined" && message) { %>
+                <div class="alert alert-success py-2">
+                  <%= message %>
+                </div>
+              <% } %>
+
+            <form action="/profile/edit" method="POST" class="row g-3">
+            <!-- Name -->
+            <div class="col-12">
+                <label for="first_name" class="form-label">First Name</label>
+                <input type="text" id="first_name" name="first_name"
+                    class="form-control forest-input"
+                    value="<%= profile[0].first_name %>">
+            </div>
+
+            <div class="col-12">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" id="last_name" name="last_name"
+                    class="form-control forest-input"
+                    value="<%= profile[0].last_name %>">
+            </div>
+
+            <!-- Email -->
+            <div class="col-12">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email"
+                    class="form-control forest-input"
+                    value="<%= profile[0].email %>">
+            </div>
+
+            <!-- Contact -->
+            <div class="col-12">
+                <label for="contact" class="form-label">Contact</label>
+                <input type="text" id="contact" name="contact"
+                    class="form-control forest-input"
+                    value="<%= profile[0].contact %>">
+            </div>
+
+            <!-- Biography -->
+            <div class="col-12">
+                <label for="bio" class="form-label">Biography</label>
+                <textarea id="bio" name="bio"
+                        class="form-control forest-input"
+                        rows="3"><%= profile[0].bio %></textarea>
+            </div>
+
+            <!-- Avatar Selection via bootstrap carousel -->
+            <div class="col-12 mb-4">
+                <label class="form-label">Choose an Avatar</label>
+                <div id="avatarCarousel" class="carousel slide">
+                <div class="carousel-inner">
+                </div>
+
+                <!-- carousel controls(arrows) -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#avatarCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#avatarCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+                </div>
+            </div>
+            <input type="hidden" name="avatar_url" id="avatarInput" value="<%= profile[0].avatar_url %>">
+
+            <!-- Submit -->
+            <div class="col-12 d-flex justify-content-center">
+                <button type="submit" class="btn btn-forest">
+                <i class="bi bi-check-circle me-1"></i> Save Changes
+                </button>
+            </div>
+            </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <%- include('partials/footer.ejs') %>
+    <script src="/js/editprofile.js"></script>
+  </body>
+</html>
+
+

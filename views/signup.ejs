@@ -19,14 +19,16 @@
               </header>
 
               <% if (typeof error !== "undefined" && error) { %>
-                <div class="alert alert-danger py-2">
+                <div class="alert alert-danger alert-dismissible text-center" role="alert">
                   <%= error %>
+                  <button type="button" class="btn-close btn-dark no-focus" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
               <% } %>
 
               <% if (typeof message !== "undefined" && message) { %>
-                <div class="alert alert-success py-2">
+                <div class="alert alert-success alert-dismissible text-center" role="alert">
                   <%= message %>
+                  <button type="button" class="btn-close btn-dark no-focus" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
               <% } %>
 
@@ -73,6 +75,26 @@
                   >
                 </div>
 
+                <!-- Avatar Selection -->
+                <div class="col-12 mb-4">
+                    <label class="form-label">Choose an Avatar</label>
+                    <div id="avatarCarousel" class="carousel slide">
+                    <div class="carousel-inner">
+                    </div>
+
+                    <!-- controls -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#avatarCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#avatarCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                    </div>
+                </div>
+                <input type="hidden" name="avatar_url" id="avatarInput">
+
+
+
                 <div class="col-12">
                   <label for="password" class="form-label">Password *</label>
                   <input
@@ -114,5 +136,6 @@
     </main>
 
     <%- include('partials/footer.ejs') %>
+    <script src="/js/signup.js"></script>
   </body>
 </html>
