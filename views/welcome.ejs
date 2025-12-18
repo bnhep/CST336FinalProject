@@ -1,36 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+  <%- include('partials/head.ejs') %>
 
-    <!-- partial for header -->
+  <body class="forest-body">
+    <%- include('partials/nav.ejs') %>
 
-    <%- include('partials/head.ejs') %> 
+    <!-- HERO -->
+    <header class="forest-hero">
+      <div class="forest-hero-overlay"></div>
+      <div class="container forest-hero-inner">
+        <p class="hero-tagline">Login was succesful. Hello <%= user.user %>!</p>
+        <p class="hero-tagline">CST336 Final Project</p>
+        <h1 class="hero-title">Welcome to Cryptid Watch</h1>
+        <p class="hero-subtitle">
+          Track cryptids, log your own encounters, and explore the creatures that lurk just beyond the treeline.
+        </p>
 
-    <body>
-        <!-- partial for nav -->
-        <%- include('partials/nav.ejs') %> 
-
-
-
-
-        <header class="forest-hero">
-        <div class="forest-hero-overlay"></div>
-        <div class="container forest-hero-inner">
-            <p class="hero-tagline">Login was succesful. Hello <%= user.user %>!</p>
-            <h1 class="hero-title">Welcome to Cryptid Watch</h1>
-            <p class="hero-subtitle">
-            Track cryptids, log your own encounters, and explore the creatures that lurk just beyond the treeline.
-            </p>
-
-            <div class="hero-actions">
-            <a href="/cryptids" class="btn btn-forest btn-lg">
-                Browse Cryptids
-            </a>
-            <a href="/sightings" class="btn btn-outline-light btn-ghost btn-lg">
-                Log a Sighting
-            </a>
-            </div>
+        <div class="hero-actions">
+          <a href="/cryptids" class="btn btn-forest btn-lg">
+            Browse Cryptids
+          </a>
+          <a href="/sightings" class="btn btn-outline-light btn-ghost btn-lg">
+            Log a Sighting
+          </a>
         </div>
-        </header>
+      </div>
+    </header>
 
     <!-- FEATURED CRYPTID OF THE DAY -->
     <section class="featured-cryptid-section">
@@ -38,22 +33,17 @@
             <div class="forest-card featured-cryptid-card">
                 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                  <div>
-                    <p class="featured-label mb-1">Featured Cryptid of the Day</p>
-                    <h2 class="featured-name mb-2">Loveland Frogman</h2>
-                    <p class="featured-region mb-2">Often sighted near Loveland, Ohio</p>
-                    <p class="featured-blurb mb-0">
-                        A human-sized frog or lizard-like creature seen lurking near riverbanks and under bridges.
-                        Witnesses report leathery skin, webbed hands, and a strange, wand-like object emitting sparks.
-                    </p>
+                  <p class="featured-label mb-1">Featured Cryptid of the Day</p>
+                  <h2 class="featured-name mb-2">Loading cryptid…</h2>
+                  <p class="featured-region mb-2">Please wait</p>
+                  <p class="featured-blurb mb-0">
+                    Retrieving information from the Cryptids database.
+                  </p>
                 </div>
-
                     <div class="text-md-end">
                     <a href="/cryptids" class="btn btn-forest mb-2">
                         View All Cryptids
                     </a>
-                    <p class="featured-note mb-0">
-                        Sample featured cryptid. TODO: API or database later.
-                    </p>
                     </div>
                 </div>
             </div>
@@ -64,31 +54,20 @@
     <!-- FEATURE CARDS -->
     <main class="page-main">
       <section class="container py-5">
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="forest-card h-100">
+        <div class="row g-4 justify-content-center">
+          <div class="col-md-6 col-lg-5">
+            <div class="forest-card h-100 p-4">
               <h2 class="forest-card-title">Discover</h2>
               <p class="forest-card-text">
                 Browse a collection of cryptids with basic info, lore, and sighting summaries.
-                (TODO: Connect to API later)
               </p>
             </div>
           </div>
-
-          <div class="col-md-4">
-            <div class="forest-card h-100">
+          <div class="col-md-6 col-lg-5">
+            <div class="forest-card h-100 p-4">
               <h2 class="forest-card-title">Record</h2>
               <p class="forest-card-text">
-                Use the <strong>Your Sightings</strong> page as a form where users can log where and when a cryptid was sighted.
-              </p>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="forest-card h-100">
-              <h2 class="forest-card-title">Connect</h2>
-              <p class="forest-card-text">
-                TODO: user accounts, favorites, etc.
+                Use the <strong>Sightings</strong> page to log where and when a cryptid was sighted.
               </p>
             </div>
           </div>
@@ -96,11 +75,7 @@
       </section>
     </main>
 
-
-
-
-        <%- include('partials/footer.ejs') %> 
-        <script src="/js/script.js"></script>  
-    </body>
-
+    <%- include('partials/footer.ejs') %>
+    <script src="/js/script.js"></script>
+  </body>
 </html>
