@@ -51,12 +51,14 @@ function attachAvatarListeners() {
 }
 
 function signupValidation() {
+    //values of inputs
     const username = document.getElementById("username");
     const firstname = document.getElementById("firstname");
     const lastname = document.getElementById("lastname");
     const password = document.getElementById("password");
     const confirmPassword = document.getElementById("confirmPassword");
 
+    //span messages inner small
     const usernameErr = document.querySelector("#username-signuperr small");
     const firstnameErr = document.querySelector("#firstname-signuperr small");
     const lastnameErr = document.querySelector("#last_name-signuperr small");
@@ -65,31 +67,32 @@ function signupValidation() {
 
     const form = document.querySelector("form[action='/signup']");
 
-    // Hide errors initially
+    //hide the errors
     [usernameErr, firstnameErr, lastnameErr, passwordErr, confirmpasswordErr].forEach(err => {
         err.style.display = "none";
     });
 
-    //Username
+    //eventlisteners
     username.addEventListener("input", () => {
-        if (username.value.trim().length < 4) {
-            usernameErr.textContent = "Username is too short.";
-            usernameErr.style.display = "inline";
-        } else {
+        //empty check
+        if (username.value.trim() === "") {
             usernameErr.style.display = "none";
+            return;    
         }
-    });
-
-    //username spacing
-    username.addEventListener("input", () => {
+        //space check
         if (/\s/.test(username.value)) {
             usernameErr.textContent = "Username cannot contain spaces.";
             usernameErr.style.display = "inline";
-        } else {
-            usernameErr.style.display = "none";
+            return;
         }
+        //length check
+        if (username.value.length < 4) {
+            usernameErr.textContent = "Username is too short.";
+            usernameErr.style.display = "inline";
+            return;
+        }
+        usernameErr.style.display = "none";
     });
-
 
     //First name
     firstname.addEventListener("input", () => {
@@ -113,9 +116,15 @@ function signupValidation() {
 
     //Password length
     password.addEventListener("input", () => {
+
+        if (password.value.trim() === "") {
+            passwordErr.style.display = "none";
+            return;
+        }
         if (password.value.length < 6) {
             passwordErr.textContent = "Password is too short.";
             passwordErr.style.display = "inline";
+            return;
         } else {
             passwordErr.style.display = "none";
         }
@@ -127,7 +136,7 @@ function signupValidation() {
         let valid = true;
 
         //username on button press
-        if (username.value.trim().length < 6) {
+        if (username.value.trim().length < 4) {
             usernameErr.textContent = "Username is too short!";
             usernameErr.style.display = "inline";
             valid = false;
