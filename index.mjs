@@ -107,16 +107,8 @@ app.get('/cryptid/:id', async (req, res) => {
 });
 
 // cryptids page
-app.get('/cryptids', async (req, res) => {
-   try {
-      const [rows] = await conn.query(
-         'select cryptid_id, name, image_url from cryptids order by name'
-      );
-      res.render('cryptids', { cryptids: rows });
-   } catch (err) {
-      console.error(err);
-      res.status(500).send('Error loading cryptids.');
-   }
+app.get('/cryptids', (req, res) => {
+   res.render('cryptids');
 });
 
 // sightings page
@@ -241,17 +233,12 @@ app.get('/sightings/new', isAuthenticated, async (req, res) => {
          'select cryptid_id, name from cryptids order by name'
       );
 
-      //get all locations for the dropdown
-      const [locations] = await conn.query(
-         'select location_id, name from locations order by name'
-      );
-
       const message = req.session.message || null;
       const error = req.session.error || null;
       req.session.message = null;
       req.session.error = null;
 
-      res.render('sightings-new', { cryptids, locations, message, error });
+      res.render('sightings-new', { cryptids, message, error });
    } catch (err) {
       console.error(err);
       res.status(500).send('Error loading new sighting form.');
@@ -264,84 +251,47 @@ app.post('/sightings/new', isAuthenticated, async (req, res) => {
       const userId = req.session.user.id;
       const {
          cryptid_id,
-         location_id,
+         location_name,
          date,
          time,
          details,
-         mood //danger rating
+         mood //threat option
       } = req.body;
 
-      if (!cryptid_id || !location_id || !date) {
+      if (!cryptid_id || !location_name || !date) {
          req.session.error = 'Cryptid, location, and date are required.';
          return res.redirect('/sightings/new');
       }
 
-      //sighting datetime
       const sightingTime = time && time.trim() !== '' ? time : '00:00';
       const sightingDateTime = `${date} ${sightingTime}:00`;
 
-      //danger level
-      let dangerLevel = parseInt(mood, 10);
-      if (isNaN(dangerLevel) || dangerLevel < 1 || dangerLevel > 5) {
-         dangerLevel = 3;
-      }
-
-      // insert the sighting
-      await conn.query(
-         `insert into sightings (userId, cryptid_id, location_id, sighting_date, description, danger_level)
-          values (?, ?, ?, ?, ?, ?)`,
-         [userId, cryptid_id, location_id, sightingDateTime, details || null, dangerLevel]
+      //find or create location
+      let [locRows] = await conn.query(
+         'select location_id from locations where name = ?',
+         [location_name]
       );
 
-      //update cryptid known_regions if this state isn't in there
-
-      //get location name
-      const [locRows] = await conn.query(
-         'select name from locations where location_id = ?',
-         [location_id]
-      );
-
+      let locationId;
       if (locRows.length > 0) {
-         const locationName = locRows[0].name;
-
-         //get current known_regions
-         const [cryptidRows] = await conn.query(
-            'select known_regions from cryptids where cryptid_id = ?',
-            [cryptid_id]
+         locationId = locRows[0].location_id;
+      } else {
+         const [locInsert] = await conn.query(
+            'insert into locations (name) values (?)',
+            [location_name]
          );
-
-         if (cryptidRows.length > 0) {
-            let knownRegions = cryptidRows[0].known_regions || '';
-            let shouldUpdate = false;
-
-            if (!knownRegions.trim()) {
-               //if empty, start with this location
-               knownRegions = locationName;
-               shouldUpdate = true;
-            } else {
-               const regions = knownRegions
-                  .split(',')
-                  .map(r => r.trim())
-                  .filter(Boolean);
-
-               const lowerSet = regions.map(r => r.toLowerCase());
-               if (!lowerSet.includes(locationName.toLowerCase())) {
-                  knownRegions = knownRegions + ', ' + locationName;
-                  shouldUpdate = true;
-               }
-            }
-
-            if (shouldUpdate) {
-               await conn.query(
-                  'update cryptids set known_regions = ? where cryptid_id = ?',
-                  [knownRegions, cryptid_id]
-               );
-            }
-         }
+         locationId = locInsert.insertId;
       }
+
+      //insert the sighting
+      await conn.query(
+         `insert into sightings (userId, cryptid_id, location_id, sighting_date, description)
+          values (?, ?, ?, ?, ?)`,
+         [userId, cryptid_id, locationId, sightingDateTime, details || null]
+      );
 
       req.session.message = 'Sighting saved successfully.';
-      res.redirect('/sightings?mode=mine');
+      res.redirect('/sightings?filter=mine');
    } catch (err) {
       console.error(err);
       req.session.error = 'There was a problem saving your sighting.';
@@ -359,46 +309,58 @@ app.get("/signup", (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-   //get the contents of the POST
-   let username = req.body.username;
-   let password = req.body.password;
-   //gets the username
-   let sql = `SELECT * 
-               FROM users 
-               WHERE username = ?`;
-   const [rows] = await conn.query(sql, [username]);
+   try {
+      // Get the contents of the POST
+      let username = req.body.username;
+      let password = req.body.password;
 
-   //username existence validation
-   if (rows.length === 0) {
-      return res.render('login', {error: 'Username not found.'});
-   }
+      // Query for the username
+      let sql = `SELECT *
+                  FROM users
+                  WHERE username = ?
+               `;
+      const [rows] = await conn.query(sql, [username]);
 
-   //if user exists get user contents
-   let user = rows[0];
-   let passwordHash = rows[0].password;
+      // Username existence validation
+      if (rows.length === 0) {
+         return res.render('login', { error: 'Username not found.' });
+      }
 
-   //check password match using bcrpyt
-   let match = await bcrypt.compare(password, passwordHash);
+      // If user exists, get user contents
+      let user = rows[0];
+      let passwordHash = user.password;
 
-   if (!match) {
-      return res.render('login', {error: 'Incorrect password.'});
-   }
+      // Check password match using bcrypt
+      let match = await bcrypt.compare(password, passwordHash);
 
-   //create a session for the user if succesful login
-   const returnTo = req.session.returnTo;
-   req.session.regenerate((err) => {
-      if (err) throw err;
+      if (!match) {
+         return res.render('login', { error: 'Incorrect password.' });
+      }
+
+      // Create a session for the user if successful login
+      const returnTo = req.session.returnTo;
+      req.session.regenerate((err) => {
+      if (err) {
+         console.error('Session regeneration failed:', err);
+         return res.status(500).render('login', { error: 'Login failed. Please try again.' });
+      }
+
       req.session.authenticated = true;
       req.session.user = {
-            id: user.userId,
-            user: user.username,
-            role: user.role,
-            avatar: user.avatar_url
+         id: user.userId,
+         user: user.username,
+         role: user.role,
+         avatar: user.avatar_url
       };
-   res.redirect(returnTo || '/welcome');
-   });
 
+      res.redirect(returnTo || '/welcome');
+      });
+   } catch (err) {
+      console.error('Error during login:', err);
+      res.status(500).render('login', { error: 'An unexpected error occurred. Please try again.' });
+   }
 });
+
 
 app.post('/signup', async (req, res) => {
    try {
@@ -455,21 +417,41 @@ app.get('/logout', isAuthenticated, (req, res) => {
 });
 
 app.get('/profile', isAuthenticated, async (req, res) => {
-   let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
-                     FROM users
-                     WHERE userId = ?`;
-   const [rows] = await conn.query(profileSQL,[req.session.user.id])
-   res.render('profile', {profile:rows, message: req.session.message, error: req.session.error})
-   req.session.message = null;
-   req.session.error = null;
+   try {
+      let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
+                        FROM users
+                        WHERE userId = ?
+      `;
+      const [rows] = await conn.query(profileSQL, [req.session.user.id]);
+
+      res.render('profile', {
+      profile: rows,
+      message: req.session.message,
+      error: req.session.error
+      });
+
+      // Clear session messages after rendering
+      req.session.message = null;
+      req.session.error = null;
+   } catch (err) {
+      console.error('Error fetching profile:', err);
+      res.status(500).render('error', { error: 'Failed to load profile.' });
+   }
 });
 
 app.get('/profile/edit', isAuthenticated, async (req, res) => {
-   let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
+   try {
+      let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at
                      FROM users
-                     WHERE userId = ?`;
-   const [rows] = await conn.query(profileSQL,[req.session.user.id])
-   res.render('editprofile', {profile: rows })
+                     WHERE userId = ?
+      `;
+      const [rows] = await conn.query(profileSQL, [req.session.user.id]);
+
+      res.render('editprofile', { profile: rows });
+   } catch (err) {
+      console.error('Error fetching profile for edit:', err);
+      res.status(500).render('error', { error: 'Failed to load edit profile page.' });
+   }
 });
 
 //post of profile edit
@@ -499,20 +481,48 @@ app.post('/profile/edit', async (req, res) => {
    }
 });
 
+app.get("/admindashboard", isAuthenticated, adminOnly, async (req, res) => {
+   
+   let usersSQL = `SELECT 
+               userId,
+               username
+               FROM users
+               ORDER BY username;`;
+   let [usernames] = await conn.query(usersSQL);
 
-app.get("/admindashboard", isAuthenticated, adminOnly, (req, res) => {
-   res.render('admindashboard');
+
+   let sightingSQL = `SELECT sighting_id
+                      FROM sightings
+                      ORDER BY sighting_id;`;
+   let [sightings] = await conn.query(sightingSQL);
+
+   let namesSQL = `SELECT 
+               cryptid_id,
+               name
+               FROM cryptids
+               ORDER BY name`;
+   let [cryptidNames] = await conn.query(namesSQL);
+
+   res.render('admindashboard', {names: cryptidNames, users: usernames, sighting: sightings});
 });
 
 /*****************************************/
 
 /*******APIS CAN GO HERE*************/
 app.get('/api/avatars', async (req, res) => {
-   let avatars = `SELECT *
-                  FROM avatars`;
-   const [rows] = await conn.query(avatars)
-   res.send(rows);
+   try {
+      let avatars = `
+      SELECT *
+      FROM avatars
+      `;
+      const [rows] = await conn.query(avatars);
+      res.send(rows);
+   } catch (err) {
+      console.error('Error fetching avatars:', err);
+      res.status(500).json({ error: 'Failed to load avatars.' });
+   }
 });
+
 
 app.get('/api/cryptids', async (req, res) => {
    try {
@@ -552,46 +562,6 @@ app.get('/api/cryptids', async (req, res) => {
    }
 });
 
-app.get('/api/cryptids/:id', async (req, res) => {
-   try {
-      const id = req.params.id;
-
-      const sql = `
-         SELECT 
-            c.cryptid_id,
-            c.name,
-            c.description,
-            c.original_region,
-            c.known_regions,
-            c.danger_level,
-            c.image_url,
-            COALESCE(stats.sighting_count, 0) AS sighting_count,
-            stats.avg_sighting_danger
-         FROM cryptids c
-         LEFT JOIN (
-            SELECT 
-               cryptid_id,
-               COUNT(*) AS sighting_count,
-               AVG(danger_level) AS avg_sighting_danger
-            FROM sightings
-            GROUP BY cryptid_id
-         ) stats ON stats.cryptid_id = c.cryptid_id
-         WHERE c.cryptid_id = ?
-         LIMIT 1
-      `;
-
-      const [rows] = await conn.query(sql, [id]);
-
-      if (!rows.length) {
-         return res.status(404).json({ error: 'Cryptid not found' });
-      }
-
-      res.json(rows[0]);
-   } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Failed to fetch cryptid' });
-   }
-});
 
 //DB TEST
 app.get("/dbTest", async(req, res) => {
