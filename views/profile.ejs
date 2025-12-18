@@ -31,7 +31,7 @@
             <div class="row d-flex align-items-center g-4">
                 <div class="col-md-4 text-center inner-profileimg">
                   <img src="<%= profile[0].avatar_url || '/img/profileplaceholder.png' %>" 
-                      alt="Profile image" class="rounded-circle mb-3" style="width: 275px;height:275px;">
+                      alt="Profile image" class="rounded-circle mb-3" style="width:275px; height:275px; object-fit:cover;">
                   <h5><%= profile[0].first_name %> <%= profile[0].last_name %></h5>
                   <small>@<%= profile[0].username %></small>
                 </div>

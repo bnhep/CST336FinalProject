@@ -564,6 +564,15 @@ app.post("/admin/users/update", isAuthenticated, adminOnly, async (req, res) => 
                      SET username = ?, password = ?, email = ?, role = ?,
                      first_name = ?, last_name = ?, bio = ?, avatar_url = ?, contact = ?
                      WHERE userId = ?`;
+
+      //manage the correct id to repopulate the user if its current
+      if (parseInt(userId, 10) === req.session.user.id) {
+         // Admin is editing their own profile
+         req.session.user.avatar = avatar_url;
+         req.session.user.role = role;
+         req.session.user.user = username;
+      }
+
       //update information in database
       let passwordHash = await bcrypt.hash(password, 10);
       await conn.query(updateSQL, [username, passwordHash, email, role, first_name, last_name, bio, avatar_url, contact, userId]);
