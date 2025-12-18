@@ -8,6 +8,7 @@ import session from 'express-session';
 const app = express();
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+app.use(express.json());
 
 //for Express to get values using POST method
 app.use(express.urlencoded({extended:true}));
@@ -462,6 +463,45 @@ app.get('/api/avatars', async (req, res) => {
    const [rows] = await conn.query(avatars)
    res.send(rows);
 });
+
+app.get('/api/cryptids', async (req, res) => {
+   try {
+      const { danger_level, search } = req.query;
+
+      let sql = `
+         SELECT cryptid_id, name, description,
+                original_region, known_regions,
+                danger_level, image_url
+         FROM cryptids
+      `;
+
+      let params = [];
+      let where = [];
+
+      if (danger_level) {
+         where.push('danger_level = ?');
+         params.push(danger_level);
+      }
+
+      if (search) {
+         where.push('(name LIKE ? OR description LIKE ?)');
+         params.push(`%${search}%`, `%${search}%`);
+      }
+
+      if (where.length) {
+         sql += ' WHERE ' + where.join(' AND ');
+      }
+
+      sql += ' ORDER BY name';
+
+      const [rows] = await conn.query(sql, params);
+      res.json(rows);
+   } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to fetch cryptids' });
+   }
+});
+
 
 //DB TEST
 app.get("/dbTest", async(req, res) => {
