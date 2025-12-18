@@ -27,10 +27,10 @@
           </div>
         </header>
 
-        <!-- Search form -->
+        <!-- search form -->
         <div class="forest-card mb-4">
           <form class="row g-3 align-items-end" method="get" action="/sightings">
-            <!-- Search by -->
+            <!-- search by -->
             <div class="col-md-3">
               <label for="mode" class="form-label">Search by</label>
               <select
@@ -52,7 +52,7 @@
               </select>
             </div>
 
-            <!-- Cryptid dropdown -->
+            <!-- cryptid dropdown -->
             <div class="col-md-4 filter-block filter-cryptid <%= mode === 'cryptid' ? '' : 'd-none' %>">
               <label for="cryptidSelect" class="form-label">Cryptid</label>
               <select
@@ -74,29 +74,20 @@
               </select>
             </div>
 
-            <!-- Location dropdown -->
+            <!-- location dropdown -->
             <div class="col-md-4 filter-block filter-location <%= mode === 'location' ? '' : 'd-none' %>">
-              <label for="locationSelect" class="form-label">Location</label>
+              <label for="location" class="form-label">Location</label>
               <select
-                id="locationSelect"
-                name="location_id"
+                id="location"
+                name="location_name"
                 class="form-select forest-input"
+                data-selected="<%= locationName || '' %>"
               >
-                <option value="">All locations</option>
-                <% if (locations && locations.length) { %>
-                  <% locations.forEach(l => { %>
-                    <option
-                      value="<%= l.location_id %>"
-                      <%= String(selectedLocationId) === String(l.location_id) ? 'selected' : '' %>
-                    >
-                      <%= l.name %>
-                    </option>
-                  <% }) %>
-                <% } %>
+                <option value="">Loading states...</option>
               </select>
             </div>
 
-            <!-- User sightings -->
+            <!-- user sightings -->
             <div class="col-md-4 filter-block filter-mine <%= mode === 'mine' ? '' : 'd-none' %>">
               <label class="form-label d-block">Your sightings</label>
               <p class="tiny-label mb-0">
@@ -104,7 +95,7 @@
               </p>
             </div>
 
-            <!-- Sort toggle -->
+            <!-- sort toggle -->
             <div class="col-md-3">
               <label class="form-label d-block">Order by time</label>
               <input
@@ -163,7 +154,7 @@
               </p>
             </div>
 
-            <!-- Search button -->
+            <!-- search button -->
             <div class="col-md-3 d-grid">
               <button type="submit" class="btn btn-forest">
                 Search
@@ -172,7 +163,7 @@
           </form>
         </div>
 
-        <!-- Results list -->
+        <!-- results list -->
         <section>
           <h2 class="h4 mb-3">
             <% if (mode === 'cryptid') { %>
