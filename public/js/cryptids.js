@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setText(origEl, c.original_region, 'Unknown');
             setText(knownEl, c.known_regions, 'No regions recorded yet.');
 
-            // default danger
+            //base danger
             if (baseDangerEl) {
                 if (c.danger_level !== null && c.danger_level !== undefined) {
                     baseDangerEl.textContent = `${c.danger_level} / 5`;
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // average danger from sightings (optional field)
+            //average danger from sightings
             if (avgDangerEl) {
                 if (c.avg_sighting_danger !== null && c.avg_sighting_danger !== undefined) {
                     const n = Number(c.avg_sighting_danger);
@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            //sighting count
             if (sightingCountEl) {
                 const count = c.sighting_count;
 
@@ -100,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // image
+            //image
             if (c.image_url && imgEl) {
                 imgEl.src = c.image_url;
                 imgEl.alt = c.name || 'Cryptid image';
@@ -117,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // update "log sighting" link to pre-select this cryptid
+            //update log sighting link
             if (logLinkEl) {
                 logLinkEl.href = `/sightings/new?cryptid_id=${encodeURIComponent(id)}`;
             }
@@ -138,21 +139,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Attach click handlers to cards / buttons
+    //click handlers for cards buttons
     document.querySelectorAll('.cryptid-card').forEach(card => {
         const id = card.dataset.cryptidId;
         if (!id) return;
 
-        // clicking the card
+        //clicking the card
         card.addEventListener('click', (e) => {
-            // if they clicked the "Mark as Seen" link, let the link work normally
+            //if clicking the seen link
             if (e.target.closest('a')) {
                 return;
             }
             loadCryptidDetails(id);
         });
 
-        // clicking the specific "Learn More" button
+        //clicking the learn more
         const learnBtn = card.querySelector('.js-learn-more');
         if (learnBtn) {
             learnBtn.addEventListener('click', (e) => {
