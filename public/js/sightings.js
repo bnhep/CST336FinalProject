@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await resp.json();
 
             //default option
-            locationSelect.innerHTML = '<option value="">All locations</option>';
+            locationSelect.innerHTML = '<option value="">Select a location</option>';
 
             data.forEach(item => {
                 const name =
