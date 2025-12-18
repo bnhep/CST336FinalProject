@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/head.ejs') %>
+
+  <body class="forest-body">
+    <%- include('partials/nav.ejs') %>
+
+    <main class="page-main">
+      <section class="container py-5">
+        <header class="page-header mb-4">
+            <h1 class="page-title">Admin Dashboard</h1>
+
+
+
+        <% if (typeof error !== "undefined" && error) { %>
+          <div class="alert alert-danger alert-dismissible w-50 mx-auto text-center" role="alert">
+            <%= error %>
+            <button type="button" class="btn-close btn-dark no-focus" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+
+        <% if (typeof message !== "undefined" && message) { %>
+          <div class="alert alert-success alert-dismissible w-50 mx-auto text-center" role="alert">
+            <%= message %>
+            <button type="button" class="btn-close btn-dark no-focus" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+
+
+        </header>
+        <div class="forest-card">
+        <% if (section === 'users') { %>
+            <h2>Edit User</h2>
+            <form method="POST" action="/admin/users/update" class="row g-3">
+            <!-- user fields -->
+            </form>
+
+        <% } else if (section === 'sightings') { %>
+            <h2>Edit Sighting</h2>
+            <form action="/admin/sightings/update" class="row g-3">
+            <!-- sighting fields -->
+            </form>
+
+        <% } else if (section === 'cryptids') { %>
+            <h2>Edit Cryptid</h2>
+            <form method="POST" action="/admin/cryptids/update" class="row g-3">
+            <!-- cryptid fields -->
+            </form>
+
+        <% } else if (section === 'add_cryptid') { %>
+            <h2>Add Cryptid</h2>
+            <form method="POST" action="/admin/addcryptid" class="row g-3">
+            <!-- add cryptid fields -->
+            </form>
+        <% } %>
+        </div>
+
+      </section>
+    </main>
+
+    <%- include('partials/footer.ejs') %>
+  </body>
+</html>
