@@ -41,15 +41,20 @@
             </div>
 
             <div class="col-md-6">
-              <label for="location" class="form-label">Location</label>
-              <input
-                type="text"
-                class="form-control forest-input"
+              <label for="location" class="form-label">Location (US State)</label>
+              <select
                 id="location"
-                name="location_name"
-                placeholder="e.g., Redwood National Park"
+                name="location_id"
+                class="form-control forest-input"
                 required
               >
+                <option value="">Select a state...</option>
+                <% if (locations && locations.length) { %>
+                  <% locations.forEach(l => { %>
+                    <option value="<%= l.location_id %>"><%= l.name %></option>
+                  <% }) %>
+                <% } %>
+              </select>
             </div>
 
             <div class="col-md-6">

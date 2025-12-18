@@ -7,19 +7,130 @@
 
     <main class="page-main">
       <section class="container py-5">
-        <header class="page-header mb-4">
-          <h1 class="page-title">Cryptids</h1>
-          <p class="page-subtitle">
-            A sample catalog of creatures.
-          </p>
+        <header class="page-header mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+          <div>
+            <h1 class="page-title">Cryptids</h1>
+            <p class="page-subtitle">
+              Browse all cryptids in the database. Click any card to learn more.
+            </p>
+          </div>
+
+          <div>
+            <a href="/sightings/new" class="btn btn-forest">
+              + Log a Sighting
+            </a>
+          </div>
         </header>
-        <div class="row g-4" id="cryptidGrid">
-          <!-- CRYPTIDS API -->
+
+        <div class="row g-4">
+          <% if (cryptids && cryptids.length) { %>
+            <% cryptids.forEach(c => { %>
+              <div class="col-md-6 col-lg-4">
+                <article
+                  class="forest-card cryptid-card h-100 d-flex flex-column"
+                  data-cryptid-id="<%= c.cryptid_id %>"
+                >
+                  <div class="flex-grow-1 text-center mb-3">
+                    <% if (c.image_url) { %>
+                      <img
+                        src="<%= c.image_url %>"
+                        alt="<%= c.name %> image"
+                        class="img-fluid rounded mb-2"
+                        style="max-height: 160px; object-fit: cover;"
+                      >
+                    <% } else { %>
+                      <div class="border rounded p-3 text-muted tiny-label">
+                        No image available.
+                      </div>
+                    <% } %>
+                    <h2 class="cryptid-name mt-2"><%= c.name %></h2>
+                  </div>
+
+                  <div class="cryptid-actions mt-auto d-flex justify-content-between">
+                    <a href="/sightings/new?cryptid_id=<%= c.cryptid_id %>" class="btn btn-forest btn-sm">
+                      Mark as Seen
+                    </a>
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-sm js-learn-more"
+                    >
+                      Learn More
+                    </button>
+                  </div>
+                </article>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p class="text-muted">
+              No cryptids in the database yet.
+            </p>
+          <% } %>
         </div>
       </section>
     </main>
 
+    <!-- modal for cryptid details -->
+    <div class="modal fade" id="cryptidDetailModal" tabindex="-1" aria-labelledby="cryptidModalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content forest-card">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cryptidModalTitle">Cryptid details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-4 text-center">
+                <img
+                  id="cryptidModalImage"
+                  src=""
+                  alt="Cryptid image"
+                  class="img-fluid rounded mb-2 d-none"
+                >
+                <div
+                  id="cryptidModalNoImage"
+                  class="border rounded p-3 text-muted tiny-label d-none"
+                >
+                  No image available.
+                </div>
+              </div>
+
+              <div class="col-md-8">
+                <p id="cryptidModalDescription" class="mb-2"></p>
+
+                <dl class="row small">
+                  <dt class="col-sm-4">Original region</dt>
+                  <dd class="col-sm-8" id="cryptidModalOriginalRegion"></dd>
+
+                  <dt class="col-sm-4">Known regions</dt>
+                  <dd class="col-sm-8" id="cryptidModalKnownRegions"></dd>
+
+                  <dt class="col-sm-4">Default danger</dt>
+                  <dd class="col-sm-8" id="cryptidModalBaseDanger"></dd>
+
+                  <dt class="col-sm-4">Sightings avg</dt>
+                  <dd class="col-sm-8" id="cryptidModalAvgDanger"></dd>
+
+                  <dt class="col-sm-4">Sightings</dt>
+                  <dd class="col-sm-8" id="cryptidModalSightingCount"></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <a href="/sightings/new" class="btn btn-forest" id="cryptidModalLogSighting">
+              Log a sighting
+            </a>
+            <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <%- include('partials/footer.ejs') %>
+
+    <!-- js -->
     <script src="/js/cryptids.js"></script>
   </body>
 </html>
