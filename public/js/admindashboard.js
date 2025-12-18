@@ -1,80 +1,47 @@
-//addevent listeners
-document.addEventListener('DOMContentLoaded', () => {
-    manageUserSelect();
-    manageSightingSelect();
-    manageCryptidSelect();
+// public/js/admindashboard.js
+
+document.addEventListener("DOMContentLoaded", () => {
+  // --- USERS ---
+  const userSelect = document.getElementById("userSelect");
+  const manageUserLink = document.getElementById("manageUserLink");
+
+  if (userSelect && manageUserLink) {
+    userSelect.addEventListener("change", () => {
+      const userId = userSelect.value;
+      if (userId && userId !== "0") {
+        manageUserLink.href = `/admindashboard/users?user_id=${userId}`;
+      } else {
+        manageUserLink.href = `/admindashboard/users`;
+      }
+    });
+  }
+
+  // --- SIGHTINGS ---
+  const sightingSelect = document.getElementById("sightingSelect");
+  const manageSightingLink = document.getElementById("manageSightingLink");
+
+  if (sightingSelect && manageSightingLink) {
+    sightingSelect.addEventListener("change", () => {
+      const sightingId = sightingSelect.value;
+      if (sightingId && sightingId !== "0") {
+        manageSightingLink.href = `/admindashboard/sightings?sighting_id=${sightingId}`;
+      } else {
+        manageSightingLink.href = `/admindashboard/sightings`;
+      }
+    });
+  }
+
+  // --- CRYPTIDS ---
+  const cryptidSelect = document.getElementById("cryptidSelect");
+  const manageCryptidLink = document.getElementById("manageCryptidLink");
+  if (cryptidSelect && manageCryptidLink) {
+    cryptidSelect.addEventListener("change", () => {
+      const cryptidId = cryptidSelect.value;
+      if (cryptidId && cryptidId !== "0") {
+        manageCryptidLink.href = `/admindashboard/cryptids?cryptid_id=${cryptidId}`;
+      } else {
+        manageCryptidLink.href = `/admindashboard/cryptids`;
+      }
+    });
+  }
 });
-
-//functions
-function manageUserSelect() {
-    let userSelect = document.getElementById('userSelect');
-    let manageUserLink = document.getElementById('manageUserLink');
-    if (userSelect && manageUserLink) {
-        userSelect.addEventListener('change', function () {
-            let selectedId = this.value;
-            if (selectedId !== "0") {
-                manageUserLink.href = `/admin/users?id=${selectedId}`;
-                manageUserLink.classList.remove("disabled");
-            } else {
-                manageUserLink.href = "#";
-                manageUserLink.classList.add("disabled");
-            }
-        });
-        //validate whether the value is 0
-        // Prevent navigation if disabled
-        manageUserLink.addEventListener('click', function (e) {
-            if (userSelect.value === "0") {
-                e.preventDefault();
-            }
-        });
-    }
-}
-
-function manageSightingSelect() {
-    let sightingSelect = document.getElementById('sightingSelect');
-    let manageSightingLink = document.getElementById('manageSightingLink');
-    if (sightingSelect && manageSightingLink) {
-        sightingSelect.addEventListener('change', function () {
-            let selectedId = this.value;
-            if (selectedId !== "0") {
-                manageSightingLink.href = `/admin/sightings?sighting=${selectedId}`;
-                manageSightingLink.classList.remove("disabled");
-            } else {
-                manageSightingLink.href = "#";
-                manageSightingLink.classList.add("disabled");
-            }
-        });
-        //validate whether the value is 0
-        // Prevent navigation if disabled
-        manageSightingLink.addEventListener('click', function (e) {
-            if (sightingSelect.value === "0") {
-                e.preventDefault();
-            }
-        });
-    }
-}
-
-function manageCryptidSelect() {
-    let cryptidSelect = document.getElementById('cryptidSelect');
-    let manageCryptidLink = document.getElementById('manageCryptidLink');
-    if (cryptidSelect && manageCryptidLink) {
-        cryptidSelect.addEventListener('change', function () {
-            let selectedId = this.value;
-            if (selectedId !== "0") {
-                manageCryptidLink.href = `/admin/cryptids?cryptid=${selectedId}`;
-                manageCryptidLink.classList.remove("disabled");
-            } else {
-                manageCryptidLink.href = "#";
-                manageCryptidLink.classList.add("disabled");
-            }
-        });
-        //validate whether the value is 0
-        // Prevent navigation if disabled
-        manageCryptidLink.addEventListener('click', function (e) {
-            if (cryptidSelect.value === "0") {
-                e.preventDefault();
-            }
-        });
-
-    }
-}
