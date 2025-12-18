@@ -107,8 +107,16 @@ app.get('/cryptid/:id', async (req, res) => {
 });
 
 // cryptids page
-app.get('/cryptids', (req, res) => {
-   res.render('cryptids');
+app.get('/cryptids', async (req, res) => {
+   try {
+      const [rows] = await conn.query(
+         'select cryptid_id, name, image_url from cryptids order by name'
+      );
+      res.render('cryptids', { cryptids: rows });
+   } catch (err) {
+      console.error(err);
+      res.status(500).send('Error loading cryptids.');
+   }
 });
 
 // sightings page
@@ -233,12 +241,17 @@ app.get('/sightings/new', isAuthenticated, async (req, res) => {
          'select cryptid_id, name from cryptids order by name'
       );
 
+      //get all locations for the dropdown
+      const [locations] = await conn.query(
+         'select location_id, name from locations order by name'
+      );
+
       const message = req.session.message || null;
       const error = req.session.error || null;
       req.session.message = null;
       req.session.error = null;
 
-      res.render('sightings-new', { cryptids, message, error });
+      res.render('sightings-new', { cryptids, locations, message, error });
    } catch (err) {
       console.error(err);
       res.status(500).send('Error loading new sighting form.');
@@ -251,47 +264,84 @@ app.post('/sightings/new', isAuthenticated, async (req, res) => {
       const userId = req.session.user.id;
       const {
          cryptid_id,
-         location_name,
+         location_id,
          date,
          time,
          details,
-         mood //threat option
+         mood //danger rating
       } = req.body;
 
-      if (!cryptid_id || !location_name || !date) {
+      if (!cryptid_id || !location_id || !date) {
          req.session.error = 'Cryptid, location, and date are required.';
          return res.redirect('/sightings/new');
       }
 
+      //sighting datetime
       const sightingTime = time && time.trim() !== '' ? time : '00:00';
       const sightingDateTime = `${date} ${sightingTime}:00`;
 
-      //find or create location
-      let [locRows] = await conn.query(
-         'select location_id from locations where name = ?',
-         [location_name]
-      );
-
-      let locationId;
-      if (locRows.length > 0) {
-         locationId = locRows[0].location_id;
-      } else {
-         const [locInsert] = await conn.query(
-            'insert into locations (name) values (?)',
-            [location_name]
-         );
-         locationId = locInsert.insertId;
+      //danger level
+      let dangerLevel = parseInt(mood, 10);
+      if (isNaN(dangerLevel) || dangerLevel < 1 || dangerLevel > 5) {
+         dangerLevel = 3;
       }
 
-      //insert the sighting
+      // insert the sighting
       await conn.query(
-         `insert into sightings (userId, cryptid_id, location_id, sighting_date, description)
-          values (?, ?, ?, ?, ?)`,
-         [userId, cryptid_id, locationId, sightingDateTime, details || null]
+         `insert into sightings (userId, cryptid_id, location_id, sighting_date, description, danger_level)
+          values (?, ?, ?, ?, ?, ?)`,
+         [userId, cryptid_id, location_id, sightingDateTime, details || null, dangerLevel]
       );
 
+      //update cryptid known_regions if this state isn't in there
+
+      //get location name
+      const [locRows] = await conn.query(
+         'select name from locations where location_id = ?',
+         [location_id]
+      );
+
+      if (locRows.length > 0) {
+         const locationName = locRows[0].name;
+
+         //get current known_regions
+         const [cryptidRows] = await conn.query(
+            'select known_regions from cryptids where cryptid_id = ?',
+            [cryptid_id]
+         );
+
+         if (cryptidRows.length > 0) {
+            let knownRegions = cryptidRows[0].known_regions || '';
+            let shouldUpdate = false;
+
+            if (!knownRegions.trim()) {
+               //if empty, start with this location
+               knownRegions = locationName;
+               shouldUpdate = true;
+            } else {
+               const regions = knownRegions
+                  .split(',')
+                  .map(r => r.trim())
+                  .filter(Boolean);
+
+               const lowerSet = regions.map(r => r.toLowerCase());
+               if (!lowerSet.includes(locationName.toLowerCase())) {
+                  knownRegions = knownRegions + ', ' + locationName;
+                  shouldUpdate = true;
+               }
+            }
+
+            if (shouldUpdate) {
+               await conn.query(
+                  'update cryptids set known_regions = ? where cryptid_id = ?',
+                  [knownRegions, cryptid_id]
+               );
+            }
+         }
+      }
+
       req.session.message = 'Sighting saved successfully.';
-      res.redirect('/sightings?filter=mine');
+      res.redirect('/sightings?mode=mine');
    } catch (err) {
       console.error(err);
       req.session.error = 'There was a problem saving your sighting.';
@@ -502,6 +552,46 @@ app.get('/api/cryptids', async (req, res) => {
    }
 });
 
+app.get('/api/cryptids/:id', async (req, res) => {
+   try {
+      const id = req.params.id;
+
+      const sql = `
+         SELECT 
+            c.cryptid_id,
+            c.name,
+            c.description,
+            c.original_region,
+            c.known_regions,
+            c.danger_level,
+            c.image_url,
+            COALESCE(stats.sighting_count, 0) AS sighting_count,
+            stats.avg_sighting_danger
+         FROM cryptids c
+         LEFT JOIN (
+            SELECT 
+               cryptid_id,
+               COUNT(*) AS sighting_count,
+               AVG(danger_level) AS avg_sighting_danger
+            FROM sightings
+            GROUP BY cryptid_id
+         ) stats ON stats.cryptid_id = c.cryptid_id
+         WHERE c.cryptid_id = ?
+         LIMIT 1
+      `;
+
+      const [rows] = await conn.query(sql, [id]);
+
+      if (!rows.length) {
+         return res.status(404).json({ error: 'Cryptid not found' });
+      }
+
+      res.json(rows[0]);
+   } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to fetch cryptid' });
+   }
+});
 
 //DB TEST
 app.get("/dbTest", async(req, res) => {
