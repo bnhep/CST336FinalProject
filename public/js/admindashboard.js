@@ -5,13 +5,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const userSelect = document.getElementById("userSelect");
   const manageUserLink = document.getElementById("manageUserLink");
 
+    manageUserLink.addEventListener('click', function (e) {
+      if (userSelect.value === "0") {
+          e.preventDefault();
+      }
+    });
+
   if (userSelect && manageUserLink) {
     userSelect.addEventListener("change", () => {
       const userId = userSelect.value;
       if (userId && userId !== "0") {
-        manageUserLink.href = `/admindashboard/users?user_id=${userId}`;
+        manageUserLink.href = `/admin/users?id=${userId}`;
       } else {
-        manageUserLink.href = `/admindashboard/users`;
+        manageUserLink.href = `#`;
       }
     });
   }
@@ -20,16 +26,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const sightingSelect = document.getElementById("sightingSelect");
   const manageSightingLink = document.getElementById("manageSightingLink");
 
-  if (sightingSelect && manageSightingLink) {
-    sightingSelect.addEventListener("change", () => {
-      const sightingId = sightingSelect.value;
-      if (sightingId && sightingId !== "0") {
-        manageSightingLink.href = `/admindashboard/sightings?sighting_id=${sightingId}`;
-      } else {
-        manageSightingLink.href = `/admindashboard/sightings`;
+    manageSightingLink.addEventListener('click', function (e) {
+      if (sightingSelect.value === "0") {
+          e.preventDefault();
       }
     });
-  }
+    if (sightingSelect && manageSightingLink) {
+      sightingSelect.addEventListener("change", () => {
+        const sightingId = sightingSelect.value;
+        if (sightingId && sightingId !== "0") {
+          manageSightingLink.href = `/admin/sightings?sighting=${sightingId}`;
+        } else {
+          manageSightingLink.href = `#`;
+        }
+      });
+    }
 
   // --- CRYPTIDS ---
   const cryptidSelect = document.getElementById("cryptidSelect");
