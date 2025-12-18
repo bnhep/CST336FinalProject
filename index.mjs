@@ -472,7 +472,6 @@ app.get('/profile/edit', isAuthenticated, async (req, res) => {
 app.post('/profile/edit', async (req, res) => {
    try {
       let { first_name, last_name, email, contact, bio, avatar_url } = req.body;
-
       let sql = `UPDATE users 
                   SET first_name = ?, 
                   last_name = ?, 
@@ -496,41 +495,104 @@ app.post('/profile/edit', async (req, res) => {
 });
 
 app.get("/admindashboard", isAuthenticated, adminOnly, async (req, res) => {
-   
-   let usersSQL = `SELECT 
-               userId,
-               username
-               FROM users
-               ORDER BY username;`;
-   let [usernames] = await conn.query(usersSQL);
+   try {
+      let errMessage = null;
+      if (req.query.deleted === "true") {
+         errMessage = "Profile has been deleted.";
+      }
 
+      let usersSQL = `SELECT userId, username
+                     FROM users
+                     ORDER BY username;
+                     `;
+      let [usernames] = await conn.query(usersSQL);
 
-   let sightingSQL = `SELECT sighting_id
-                      FROM sightings
-                      ORDER BY sighting_id;`;
-   let [sightings] = await conn.query(sightingSQL);
+      let sightingSQL = `SELECT sighting_id
+                        FROM sightings
+                        ORDER BY sighting_id;
+                        `;
+      let [sightings] = await conn.query(sightingSQL);
 
-   let namesSQL = `SELECT 
-               cryptid_id,
-               name
-               FROM cryptids
-               ORDER BY name`;
-   let [cryptidNames] = await conn.query(namesSQL);
+      let namesSQL = `SELECT cryptid_id, name
+                     FROM cryptids
+                     ORDER BY name;
+                     `;
+      let [cryptidNames] = await conn.query(namesSQL);
 
-   res.render('admindashboard', {names: cryptidNames, users: usernames, sighting: sightings});
+      res.render("admindashboard", {names: cryptidNames, users: usernames, sighting: sightings, error: errMessage});
+   } catch (err) {
+      console.error("Error loading admin dashboard:", err);
+      res.render("admindashboard", {names: [], users: [], sighting: [], error: "Failed to load dashboard data."});
+   }
 });
 
-//
+
+//Start of user's information update for admindashboard
 app.get("/admin/users", isAuthenticated, adminOnly, async (req, res) => {
+   try {
+      const userId = req.query.id;
+      console.log("userid:", userId);
 
-   const userId = req.query.id;
-   console.log('userid:', userId);
+      // declare message variable up front
+      let message = null;
 
+      if (req.query.update === "true") {
+         message = "Profile has been updated.";
+      }
+      console.log(message);
 
-   res.render('dashboardedit', {section: 'users'});
+      const userSQL = `
+      SELECT *
+      FROM users
+      WHERE userId = ?
+      `;
+      const [rows] = await conn.query(userSQL, [userId]);
+
+      res.render("dashboardedit", { section: "users", profile: rows, message: message });
+   } catch (err) {
+      console.error("Error fetching user:", err);
+      res.render("dashboardedit", {section: "users", profile: [], error: "Failed to load user data."});
+   }
 });
 
-//
+app.post("/admin/users/update", isAuthenticated, adminOnly, async (req, res) => {
+   try {
+      //form data from req.body
+      const { username, password, email, role, first_name, last_name, bio, avatar_url, contact, userId} = req.body;
+
+      let updateSQL =`UPDATE users 
+                     SET username = ?, password = ?, email = ?, role = ?,
+                     first_name = ?, last_name = ?, bio = ?, avatar_url = ?, contact = ?
+                     WHERE userId = ?`;
+      //update information in database
+      let passwordHash = await bcrypt.hash(password, 10);
+      await conn.query(updateSQL, [username, passwordHash, email, role, first_name, last_name, bio, avatar_url, contact, userId]);
+
+      //rerun queries to get all information
+      res.redirect(`/admin/users?id=${userId}&update=true`);
+   } catch (err) {
+      console.error(err);
+      res.redirect(`admindashboard`);
+   }
+});
+
+app.get("/admin/users/delete", isAuthenticated, adminOnly, async (req, res) => {
+  try {
+      const userId = req.query.id;
+
+      let deleteSQL = `DELETE 
+                     FROM users WHERE userId = ?`;
+      await conn.query(deleteSQL , [userId]);
+
+      res.redirect("/admindashboard?deleted=true");
+  } catch (err) {
+      console.error("Error deleting user:", err);
+      res.redirect("/admindashboard?error=Delete+failed");
+  }
+});// continuation of update/delete for user's information via admin dashboard
+
+
+//sightings admindashboard
 app.get("/admin/sightings", isAuthenticated, adminOnly, async (req, res) => {
    const sightingId = req.query.sighting;
    console.log('sightingid:', sightingId);
@@ -538,7 +600,7 @@ app.get("/admin/sightings", isAuthenticated, adminOnly, async (req, res) => {
    res.render('dashboardedit', {section: 'sightings'});
 });
 
-//
+//cryptids admindashboard
 app.get("/admin/cryptids", isAuthenticated, adminOnly, async (req, res) => {
    const cryptidId = req.query.cryptid;
    console.log('cryptidid:', cryptidId);

@@ -10,8 +10,6 @@
         <header class="page-header mb-4">
             <h1 class="page-title">Admin Dashboard</h1>
 
-
-
         <% if (typeof error !== "undefined" && error) { %>
           <div class="alert alert-danger alert-dismissible w-50 mx-auto text-center" role="alert">
             <%= error %>
@@ -33,6 +31,92 @@
             <h2>Edit User</h2>
             <form method="POST" action="/admin/users/update" class="row g-3">
             <!-- user fields -->
+
+                <!-- username -->
+                <div class="col-12">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username"
+                        class="form-control forest-input"
+                        value="<%= profile[0].username %>">
+                </div>
+
+                <!-- password -->
+                <div class="col-12">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password"
+                        class="form-control forest-input"
+                        value="<%= profile[0].password %>">
+                </div>
+
+                <!-- email -->
+                <div class="col-12">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email"
+                        class="form-control forest-input"
+                        value="<%= profile[0].email %>">
+                </div>
+
+                <!-- role -->
+                <div class="col-12">
+                <label for="role" class="form-label">Role</label>
+                <select id="role" name="role" class="form-select forest-input">
+                    <option value="user" <%= profile[0].role === 'user' ? 'selected' : '' %>>User</option>
+                    <option value="admin" <%= profile[0].role === 'admin' ? 'selected' : '' %>>Admin</option>
+                </select>
+                </div>
+
+                <!-- first name -->
+                <div class="col-12">
+                <label for="first_name" class="form-label">First Name</label>
+                <input type="text" id="first_name" name="first_name"
+                        class="form-control forest-input"
+                        value="<%= profile[0].first_name %>">
+                </div>
+
+                <!-- last name -->
+                <div class="col-12">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" id="last_name" name="last_name"
+                        class="form-control forest-input"
+                        value="<%= profile[0].last_name %>">
+                </div>
+
+                <!-- biography -->
+                <div class="col-12">
+                <label for="bio" class="form-label">Biography</label>
+                <textarea id="bio" name="bio" rows="4"
+                            class="form-control forest-input"><%= profile[0].bio %></textarea>
+                </div>
+
+                <!-- avatar url -->
+                <div class="col-12">
+                <label for="avatar_url" class="form-label">Avatar URL</label>
+                <input type="text" id="avatar_url" name="avatar_url"
+                        class="form-control forest-input"
+                        value="<%= profile[0].avatar_url %>">
+                </div>
+
+                <!-- contact -->
+                <div class="col-12">
+                <label for="contact" class="form-label">Contact</label>
+                <input type="text" id="contact" name="contact"
+                        class="form-control forest-input"
+                        value="<%= profile[0].contact %>">
+                </div>
+
+                <!-- hidden userid -->
+                <input type="hidden" name="userId" value="<%= profile[0].userId %>">
+
+                <!-- buttons -->
+                <div class="col-12 d-flex justify-content-between">
+                <button type="submit" class="btn btn-forest">
+                    <i class="bi bi-check-circle me-1"></i> Save Changes
+                </button>
+
+                <a href="/admin/users/delete?id=<%= profile[0].userId %>" class="btn btn-danger btn-sm">
+                    <i class="bi bi-trash me-1"></i> Delete User
+                </a>
+                </div>
             </form>
 
         <% } else if (section === 'sightings') { %>
