@@ -32,22 +32,17 @@
             <div class="forest-card featured-cryptid-card">
                 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                  <div>
-                    <p class="featured-label mb-1">Featured Cryptid of the Day</p>
-                    <h2 class="featured-name mb-2">Loveland Frogman</h2>
-                    <p class="featured-region mb-2">Often sighted near Loveland, Ohio</p>
-                    <p class="featured-blurb mb-0">
-                        A human-sized frog or lizard-like creature seen lurking near riverbanks and under bridges.
-                        Witnesses report leathery skin, webbed hands, and a strange, wand-like object emitting sparks.
-                    </p>
+                  <p class="featured-label mb-1">Featured Cryptid of the Day</p>
+                  <h2 class="featured-name mb-2">Loading cryptid…</h2>
+                  <p class="featured-region mb-2">Please wait</p>
+                  <p class="featured-blurb mb-0">
+                    Retrieving information from the Cryptids database.
+                  </p>
                 </div>
-
                     <div class="text-md-end">
                     <a href="/cryptids" class="btn btn-forest mb-2">
                         View All Cryptids
                     </a>
-                    <p class="featured-note mb-0">
-                        Sample featured cryptid. TODO: API or database later.
-                    </p>
                     </div>
                 </div>
             </div>
@@ -64,7 +59,6 @@
               <h2 class="forest-card-title">Discover</h2>
               <p class="forest-card-text">
                 Browse a collection of cryptids with basic info, lore, and sighting summaries.
-                (TODO: Connect to API later)
               </p>
             </div>
           </div>
@@ -77,18 +71,6 @@
               </p>
             </div>
           </div>
-
-          <div class="col-md-4">
-            <div class="forest-card h-100">
-              <h2 class="forest-card-title">Connect</h2>
-              <p class="forest-card-text">
-                TODO: user accounts, favorites, etc.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
 
     <%- include('partials/footer.ejs') %>
     <script src="/js/script.js"></script>
