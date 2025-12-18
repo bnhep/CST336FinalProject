@@ -111,17 +111,18 @@ function signupValidation() {
         }
     });
 
-
     //Final validation on submit
     form.addEventListener("submit", (e) => {
         let valid = true;
 
+        //username on button press
         if (username.value.trim().length < 6) {
             usernameErr.textContent = "Username is too short!";
             usernameErr.style.display = "inline";
             valid = false;
         }
 
+        //firstname on button press
         if (!/^[A-Za-z]*$/.test(firstname.value)) {
             firstnameErr.textContent = "Please enter letters only.";
             firstnameErr.style.display = "inline";
@@ -129,24 +130,28 @@ function signupValidation() {
 
         }
 
+        //lastname on button press
         if (!/^[A-Za-z]*$/.test(lastname.value)) {
             lastnameErr.textContent = "Please enter letters only.";
             lastnameErr.style.display = "inline";
             valid = false;
         }
 
+        //password on button
         if (password.value.length < 6) {
             passwordErr.textContent = "Password is too short.";
             passwordErr.style.display = "inline";
             valid = false;
         }
 
+        //confirm on button
         if (password.value !== confirmPassword.value) {
             confirmpasswordErr.textContent = "Password does not match.";
             confirmpasswordErr.style.display = "inline";
             valid = false;
         }
 
+        //prevent from doing its action if not valid
         if (!valid) e.preventDefault();
     });
 }
