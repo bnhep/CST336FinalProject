@@ -366,7 +366,6 @@ app.post('/sightings/new', isAuthenticated, async (req, res) => {
          }
       }
 
-      req.session.message = 'Sighting saved successfully.';
       res.redirect('/sightings?mode=mine');
    } catch (err) {
       console.error(err);
@@ -481,7 +480,6 @@ app.post('/sightings/:id/edit', isAuthenticated, async (req, res) => {
          [cryptid_id, location_name, sightingDateTime, details || null, dangerLevel, sightingId]
       );
 
-      req.session.message = 'Sighting updated successfully.';
       res.redirect('/sightings?mode=mine');
    } catch (err) {
       console.error(err);
