@@ -1,3 +1,14 @@
+//event listeners
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await loadAvatars();
+        attachAvatarListeners();
+    } catch (err) {
+        console.error('Error initializing avatar carousel:', err);
+    }
+});
+
+//function
 async function loadAvatars() {
     try {
         let url = '/api/avatars';
@@ -37,12 +48,3 @@ function attachAvatarListeners() {
         console.error('Error attaching avatar listeners:', err);
     }
 }
-
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        await loadAvatars();
-        attachAvatarListeners();
-    } catch (err) {
-        console.error('Error initializing avatar carousel:', err);
-    }
-});
