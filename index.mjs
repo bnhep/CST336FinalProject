@@ -439,8 +439,6 @@ app.get('/profile', isAuthenticated, async (req, res) => {
    }
 });
 
-
-
 app.get('/profile/edit', isAuthenticated, async (req, res) => {
    try {
       let profileSQL = `SELECT username, email, first_name, last_name, bio, avatar_url, contact, created_at

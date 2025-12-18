@@ -61,7 +61,7 @@ function manageCryptidSelect() {
         cryptidSelect.addEventListener('change', function () {
             let selectedId = this.value;
             if (selectedId !== "0") {
-                manageCryptidLink.href = `/admin/cryptids?crpytid=${selectedId}`;
+                manageCryptidLink.href = `/admin/cryptids?cryptid=${selectedId}`;
                 manageCryptidLink.classList.remove("disabled");
             } else {
                 manageCryptidLink.href = "#";
