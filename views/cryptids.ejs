@@ -77,6 +77,7 @@
             <h5 class="modal-title" id="cryptidModalTitle">Cryptid details</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
+
           <div class="modal-body">
             <div class="row g-3">
               <div class="col-md-4 text-center">
@@ -93,8 +94,10 @@
                   No image available.
                 </div>
               </div>
+
               <div class="col-md-8">
                 <p id="cryptidModalDescription" class="mb-2"></p>
+
                 <dl class="row small">
                   <dt class="col-sm-4">Original region</dt>
                   <dd class="col-sm-8" id="cryptidModalOriginalRegion"></dd>
@@ -107,10 +110,14 @@
 
                   <dt class="col-sm-4">Sightings avg</dt>
                   <dd class="col-sm-8" id="cryptidModalAvgDanger"></dd>
+
+                  <dt class="col-sm-4">Sightings</dt>
+                  <dd class="col-sm-8" id="cryptidModalSightingCount"></dd>
                 </dl>
               </div>
             </div>
           </div>
+
           <div class="modal-footer">
             <a href="/sightings/new" class="btn btn-forest" id="cryptidModalLogSighting">
               Log a sighting
