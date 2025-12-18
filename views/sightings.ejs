@@ -13,7 +13,7 @@
           <div>
             <h1 class="page-title">Sightings</h1>
             <p class="page-subtitle">
-              Explore cryptid sightings by creature, location, or your own encounters. Filter them by time and sort by date.
+              Read about cryptid ecounters from other users.
             </p>
             <% if (error) { %>
               <div class="alert alert-danger mt-2"><%= error %></div>
@@ -110,14 +110,14 @@
                 class="btn btn-ghost"
               >
                 <% if (order === 'oldest') { %>
-                  Oldest → Newest
+                  Oldest to Newest
                 <% } else { %>
-                  Newest → Oldest
+                  Newest to Oldest
                 <% } %>
               </button>
             </div>
 
-            <!-- Time range -->
+            <!-- time range -->
             <div class="col-md-6">
               <label class="form-label">Between years</label>
               <div class="d-flex gap-2">
@@ -149,9 +149,6 @@
                   <% } %>
                 </select>
               </div>
-              <p class="tiny-label mt-1 mb-0">
-                Time filter applies to all search modes.
-              </p>
             </div>
 
             <!-- search button -->
@@ -174,11 +171,22 @@
               Your sightings
             <% } %>
           </h2>
-
           <% if (sightings && sightings.length) { %>
             <% sightings.forEach(s => { %>
               <div class="forest-card mb-3">
-                <h3 class="h5 mb-1"><%= s.cryptid_name %></h3>
+                <!-- title with edit -->
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                  <h3 class="h5 mb-0"><%= s.cryptid_name %></h3>
+
+                  <% if (user && String(s.userId) === String(user.id)) { %>
+                    <a
+                      href="/sightings/<%= s.sighting_id %>/edit"
+                      class="btn btn-ghost btn-sm"
+                    >
+                      Edit
+                    </a>
+                  <% } %>
+                </div>
 
                 <p class="tiny-label mb-1">
                   <strong>When:</strong> <%= s.sighting_date %>
