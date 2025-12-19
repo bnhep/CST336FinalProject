@@ -854,18 +854,126 @@ app.get("/admin/sightings/delete", isAuthenticated, adminOnly, async (req, res) 
 });// continuation of update/delete for sightings information via admin dashboard
 
 //cryptids admindashboard
-app.get("/admin/cryptids", isAuthenticated, adminOnly, async (req, res) => {
-   const cryptidId = req.query.cryptid;
-   console.log('cryptidid:', cryptidId);
+app.get("/admindashboard/cryptids", isAuthenticated, adminOnly, async (req, res) => {
+  const cryptidId = req.query.cryptid_id;
 
-   res.render('dashboardedit', {section: 'cryptids'});
+  if (!cryptidId) {
+    return res.redirect("/admindashboard");
+  }
+
+  const [cryptid] = await conn.query(
+    "SELECT * FROM cryptids WHERE cryptid_id = ?",
+    [cryptidId]
+  );
+
+  if (!cryptid.length) {
+    return res.redirect("/admindashboard");
+  }
+
+  res.render("dashboardedit", {
+    section: "cryptids",
+    cryptid: cryptid[0]
+  });
 });
 
-//
-app.get("/admin/addcryptid", isAuthenticated, adminOnly, async (req, res) => {
+app.get("/admin/addcryptid", isAuthenticated, adminOnly, (req, res) => {
+  res.render("dashboardedit", { section: "add_cryptid" });
+});
 
+app.post("/admin/cryptids/update", isAuthenticated, adminOnly, async (req, res) => {
+  const {
+    cryptid_id,
+    name,
+    description,
+    original_region,
+    known_regions,
+    danger_level,
+    image_url
+  } = req.body;
 
-   res.render('dashboardedit', {section: 'add_cryptid'});
+  await conn.query(
+    `UPDATE cryptids
+     SET name = ?, description = ?, original_region = ?, known_regions = ?,
+         danger_level = ?, image_url = ?
+     WHERE cryptid_id = ?`,
+    [
+      name,
+      description,
+      original_region,
+      known_regions,
+      danger_level,
+      image_url,
+      cryptid_id
+    ]
+  );
+
+  res.redirect("/admindashboard?message=Cryptid updated successfully");
+});
+
+app.post("/admin/addcryptid", isAuthenticated, adminOnly, async (req, res) => {
+  const {
+    name,
+    description,
+    original_region,
+    known_regions,
+    danger_level,
+    image_url
+  } = req.body;
+
+  await conn.query(
+    `INSERT INTO cryptids
+     (name, description, original_region, known_regions, danger_level, image_url)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      name,
+      description,
+      original_region,
+      known_regions,
+      danger_level,
+      image_url
+    ]
+  );
+
+  res.redirect("/admindashboard?message=Cryptid added successfully");
+});
+
+app.get("/admin/cryptids/delete", isAuthenticated, adminOnly, async (req, res) => {
+  try {
+    const cryptidId = req.query.id;
+
+    if (!cryptidId) {
+      return res.redirect("/admindashboard?error=Missing+cryptid+id");
+    }
+
+    const deleteSQL = `
+      DELETE FROM cryptids
+      WHERE cryptid_id = ?
+    `;
+
+    await conn.query(deleteSQL, [cryptidId]);
+
+    res.redirect("/admindashboard?message=Cryptid+deleted");
+  } catch (err) {
+    console.error("Error deleting cryptid:", err);
+    res.redirect("/admindashboard?error=Cryptid+delete+failed");
+  }
+});
+
+app.post("/admin/cryptids/delete", isAuthenticated, adminOnly, async (req, res) => {
+  try {
+    const { cryptid_id } = req.body;
+
+    if (!cryptid_id) {
+      return res.redirect("/admindashboard?message=Missing cryptid id");
+    }
+
+    await conn.query("DELETE FROM cryptids WHERE cryptid_id = ?", [cryptid_id]);
+
+    res.redirect("/admindashboard?message=Cryptid deleted successfully");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/admindashboard?message=Failed to delete cryptid");
+  }
 });
 
 /*****************************************/
