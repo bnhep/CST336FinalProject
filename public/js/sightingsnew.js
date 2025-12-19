@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadStates() {
         try {
-            // Show loading option
+            //show loading
             locationSelect.innerHTML = '<option value="">Loading states...</option>';
 
             const resp = await fetch('https://csumb.space/api/allStatesAPI.php');
@@ -14,10 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await resp.json();
 
-            // Reset with prompt
+            //reset
             locationSelect.innerHTML = '<option value="">Select a state...</option>';
 
-            // Add states from API
+            //add states from api
             data.forEach(item => {
                 const name =
                     item.name ||
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 locationSelect.appendChild(opt);
             });
 
-            // ---- NEW: Auto-select the correct state on EDIT page ----
+            // select the correct state on edit page
             const selected = locationSelect.dataset.selected;
             if (selected) {
                 locationSelect.value = selected;
